@@ -40,3 +40,11 @@ body[data-part="0"] .hd,body[data-part="1"] .hd{background:linear-gradient(120de
 .ph-top .net{margin-left:6px;min-width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;font:800 13px var(--b);background:#E3F7EE;color:#15803D}
 .ph-top .net.bad{background:#FFF3D6;color:#B45309;animation:pulse 1.4s infinite}
 .ph-top .net:empty{display:none}
+
+/* тақта: Firebase күйі */
+.fb-chip{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:14px;background:#fff;border:2px solid var(--line);box-shadow:var(--sh);white-space:nowrap}
+.fb-chip i{font-style:normal;font-size:20px}.fb-chip i img{width:22px;height:22px}
+.fb-chip small{font:700 11px/1.15 var(--b);color:var(--mut)}
+.fb-chip b{font:800 13px var(--d);color:var(--ink)}
+.fb-chip.ok{border-color:#22C55E;background:#F0FDF4}.fb-chip.ok b{color:#15803D}
+.fb-chip.bad{border-color:#F59E0B;background:#FFFBEB}.fb-chip.bad b{color:#B45309}

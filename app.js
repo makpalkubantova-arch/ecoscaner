@@ -355,7 +355,8 @@ function render() {
 let liveT = null, wtab = "all"; const seen = new Set();
 async function liveTick() {
   clearTimeout(liveT); const id = ST[cur].id;
-  let d = {}; if (LIVE.on()) { try { d = await LIVE.read(); } catch {} }
+  let d = {}, fbOk = false; if (LIVE.on()) { try { d = await LIVE.read(); fbOk = true; } catch {} }
+  { const c = $("#fbChip"); if (c) { c.className = "fb-chip " + (fbOk ? "ok" : "bad"); $("#fbS").textContent = !LIVE.on() ? "өшірулі" : fbOk ? "қосулы" : "байланыс жоқ"; c.title = fbOk ? "Firebase қосулы: оқушылардың жауаптары тақтаға тірі түседі · бөлме " + LIVE.room : "Firebase-ке қосыла алмады: интернетті тексеріңіз (нәтижелер телефондарда сақталады)"; } }
   const studs = Object.entries(d.students || {}).map(([k, v]) => ({ id: k, ...v })), grp = d.groups || {};
   const notes = [...Object.values(d.notes || {}), ...store.get("notes", [])].sort((a, b) => b.ts - a.ts);
   const bonus = { ...store.get("bonus", {}) }; Object.entries(grp).forEach(([g, v]) => { if (v && v.bonus != null) bonus[g] = v.bonus; });
