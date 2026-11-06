@@ -365,10 +365,10 @@ async function liveTick() {
   const rl = $("#resList");
   if (rl && TASKS.includes(id)) {
     if (!LIVE.on()) rl.innerHTML = `<p class="muted sm">Firebase қосылғанда оқушылардың нәтижесі осында тірі шығады (⚙)</p>`;
-    else { const done = studs.filter(x => x.at && x.at[id]).sort((a, b) => a.at[id] - b.at[id]), mx = PTS[id];
+    else { const done = studs.filter(x => x.at && x.at[id]).sort((a, b) => (b.sc[id] || 0) - (a.sc[id] || 0) || a.at[id] - b.at[id]), mx = PTS[id];
       $("#resN").innerHTML = `<b>${done.length}</b>/${studs.length} орындады${done.length ? ` · орташа <b>${fmt(done.reduce((t, x) => t + (x.sc[id] || 0), 0) / done.length)}</b>/${mx}` : ""}`;
       rl.innerHTML = done.length ? done.map((x, i) => { const v = x.sc[id] || 0, c = v >= mx ? "full" : v >= mx / 2 ? "mid" : "low", nw = !seen.has(x.id + id); seen.add(x.id + id);
-        return `<div class="rr ${c} ${nw ? "new" : ""}"><i>${i + 1}</i><b>${esc(x.name)}${id === "t2" && x.pair ? ` <small>+ ${esc(x.pair)}</small>` : ""}</b><span>${DATA.groups[x.g]?.i || ""}</span><em>${v}/${mx}</em><time>${hm(x.at[id])}</time></div>`; }).join("") : `<p class="muted sm">Әзірге ешкім аяқтамады…</p>`; }
+        return `<div class="rr ${c} ${nw ? "new" : ""}"><i>${["🥇", "🥈", "🥉"][i] || i + 1}</i><b>${esc(x.name)}${id === "t2" && x.pair ? ` <small>+ ${esc(x.pair)}</small>` : ""}</b><span>${DATA.groups[x.g]?.i || ""}</span><em>${v}/${mx}</em><time>${hm(x.at[id])}</time></div>`; }).join("") : `<p class="muted sm">Әзірге ешкім аяқтамады…</p>`; }
   }
   if (id === "t3") Object.keys(DATA.groups).forEach(g => { const box = $("#gr-" + g); if (!box) return; const sub = grp[g]?.sub; $("#bo-" + g).textContent = bonus[g] ? `+${bonus[g]} ✓` : "";
     if (sub) box.innerHTML = `<div class="sub"><div class="ans">${sub.ans.map((a, i) => `<span class="${a === DATA.t3.qs[i].o[DATA.t3[g].a[i]] ? "ok" : "no"}">${i + 1}) ${esc(a)}</span>`).join("")}</div>${sub.idea ? `<p class="idea">💡 ${esc(sub.idea)}</p>` : ""}<div class="gsc">${sub.ok}/3 ${bonus[g] ? `+ ${bonus[g]}` : ""} · ${esc(sub.by)}</div></div>`; });
