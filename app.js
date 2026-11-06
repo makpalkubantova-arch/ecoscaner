@@ -34,7 +34,7 @@ function setScore(k, v, done) { const s = scores(); s[k] = Math.max(0, Math.min(
 function push() { const m = me(); if (!m || !LIVE.on()) return; LIVE.pushStudent(m.id, { name: m.name, g: m.g, sc: scores(), at: doneAt(), pair: store.get("pair", ""), total: total(), sky: store.get("mySky", null), ts: m.ts || Date.now() }); }
 function paintMe() { const e = $("#phSc"); if (e) e.textContent = `${total()} / ${MAXP}`; }
 const RESULT_KEYS = ["me", "sc", "at", "pair", "mySky", "q_t1", "t1ord", "t1chk", "q_t2", "q_t3", "q_t4", "q_t5", "q_t6", "t5o", "t3sent", "notes", "bonus"];
-const wipe = () => RESULT_KEYS.forEach(k => store.del(k));
+const wipe = () => { RESULT_KEYS.forEach(k => store.del(k)); LIVE.drop(); };
 
 /* ---------- QR ---------- */
 let qn = 0;
@@ -166,7 +166,7 @@ const TASK = {
 if (MODE !== "b") {
   document.body.classList.add("ph"); $("#phone").hidden = false;
   const ph = $("#phone"); let open = null, follow = null;
-  const top = () => `<div class="ph-top"><span class="case-no sm">ЭКО<br>СКАН</span><span class="me">${me() ? esc(me().name) + " · " + DATA.groups[me().g].i : "Сарапшы"}</span><span class="sc" id="phSc">${total()} / ${MAXP}</span></div>`;
+  const top = () => `<div class="ph-top"><span class="case-no sm">ЭКО<br>СКАН</span><span class="me">${me() ? esc(me().name) + " · " + DATA.groups[me().g].i : "Сарапшы"}</span><span class="sc" id="phSc">${total()} / ${MAXP}</span><span class="net" id="phNet"></span></div>`;
   function guest() {
     let stars = 0;
     ph.innerHTML = `<div class="ph-top"><span class="case-no sm">ЭКО<br>СКАН</span><span class="me">Құрметті қонақ</span></div>
@@ -208,6 +208,8 @@ if (MODE !== "b") {
     TASK[id]($("#tk")); $("#bk").onclick = hub;
   }
   if (MODE === "g") guest(); else if (!me()) join(); else hub();
+  const net = () => { const e = $("#phNet"); if (!e) return; const bad = !navigator.onLine || LIVE.unsent(); e.className = "net" + (bad ? " bad" : ""); e.title = bad ? "Нәтиже телефонда сақталды, интернет қосылғанда өзі жіберіледі" : "Нәтиже тақтаға жіберілді"; e.textContent = bad ? "⏳" : "✓"; };
+  if (MODE === "s") setInterval(net, 2000);
   if (MODE === "s") setInterval(async () => { if (!LIVE.on()) return;
     try { const ss = await LIVE.getSession(), loc = store.get("sess", null);
       if (ss && ss.id !== loc) { const m = me(); store.set("sess", ss.id); if (loc || (m && (m.ts || 0) < ss.ts)) { wipe(); store.del("t5mix"); toast("🔔 Жаңа сабақ басталды — атыңды қайта жаз"); join(); return; } } } catch {}
