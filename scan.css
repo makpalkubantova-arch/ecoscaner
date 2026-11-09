@@ -170,3 +170,17 @@ body.ph .t1l{grid-template-columns:1fr}
 .ph-list b{white-space:nowrap}
 .t3b{grid-template-rows:auto 1fr}
 .sumb .lead div{grid-template-columns:34px 1fr auto}
+
+/* --- жаңа құрылым: бағалау кестесі, топтар, 6 спикер, хатшы --- */
+.ctab{width:100%;border-collapse:collapse;font-size:15px}.ctab th{text-align:left;font-size:12px;color:#4b5563;padding:6px;border-bottom:2px solid #e5e7eb}.ctab td{padding:6px;border-bottom:1px solid #eef2f7;vertical-align:top}.ctab td.pt{font-weight:900;font-size:18px;text-align:center}
+.dsc div{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #e5e7eb;font-size:15px}.dsc b{font-size:18px}
+.grp3{display:grid;grid-template-columns:1fr 1fr 1fr 260px;gap:14px}.gcard{border-top:8px solid var(--gc)}.gcard ol{margin:6px 0 0;padding-left:20px;line-height:1.7;font-size:17px}.gcard b{font-size:13px;color:#0B3D3A}
+.hwq{font-size:20px;line-height:1.6;padding-left:22px}
+.sptim{margin-left:auto;font-weight:900;font-size:20px;align-self:center;padding:0 10px}
+#lnav button small{font-size:11px;opacity:.85}
+.rr2{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid #eef2f7;cursor:pointer;font-size:14px}.rr2 em{font-style:normal;font-size:11px;font-weight:800;color:#fff;border-radius:99px;padding:1px 8px}.lv-A{background:#059669}.lv-B{background:#0284C7}.lv-C{background:#D97706}
+.sec-tabs{display:flex;gap:6px;overflow:auto;margin-top:10px;padding-bottom:4px}.sec-tabs button{flex:none;border:0;border-radius:99px;padding:8px 12px;background:#fff;font-weight:800;font-size:13px}.sec-tabs button.on{background:#0B3D3A;color:#fff}
+.sec-all{margin-top:8px;display:flex;gap:6px;align-items:center;font-weight:800;font-size:13px}.sec-all button,.sec-ch button{width:44px;height:42px;border-radius:12px;border:2px solid #cfe0e6;background:#fff;font-weight:900;font-size:17px}
+.sec-m{margin-top:8px}.sec-h{display:flex;justify-content:space-between;font-weight:800}.sec-ch{display:flex;gap:6px;margin-top:6px}.sec-ch button.on{background:#00799A;border-color:#00799A;color:#fff}
+.sec-g{display:flex!important;flex-direction:row!important;gap:6px}.sec-g button{flex:1;padding:8px 4px!important;font-size:13px!important}
+.mbox .grp3{grid-template-columns:repeat(3,1fr)}.rr2 em{display:inline-block;line-height:1.4;height:auto;width:auto}
