@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="kk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Материалдар · Экосканер · Қоршаған ортаның сапасы</title>
+<link rel="stylesheet" href="vendor/golos.css">
+<script src="data.js"></script><script src="vendor/qrcode.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:linear-gradient(#004A5C,#004A5C) top/100% 380px no-repeat,#eef6fc;min-height:100%}
+body{font-family:'Golos Text',sans-serif;color:#13233a;max-width:1180px;margin:0 auto;padding:28px 20px 60px}
+a{color:#0077A8}
+.hero{display:grid;grid-template-columns:1fr 190px;gap:28px;align-items:center;color:#fff;padding:12px 0 34px}
+.hero .k{color:#D97706;font-weight:800;letter-spacing:.12em;font-size:13px}
+.hero h1{font-size:40px;line-height:1.08;margin:8px 0 10px;font-weight:800}
+.hero p{color:#cfe6f5;font-size:16px;line-height:1.5}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.btn{display:inline-flex;gap:8px;align-items:center;padding:11px 18px;border-radius:999px;font-weight:700;text-decoration:none;font-size:15px}
+.btn.p{background:#00799A;color:#fff}.btn.g{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.qrbox{background:#fff;border-radius:18px;padding:12px;text-align:center;color:#004A5C;font-weight:700;font-size:13px}
+.qrbox svg{width:100%;display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px}
+.card{background:#fff;border-radius:18px;box-shadow:0 8px 24px rgba(11,37,69,.10);overflow:hidden;display:flex;flex-direction:column}
+.card .pv{height:190px;background:#dfeaf5 top center/cover no-repeat;border-bottom:1px solid #e3ebf3}
+.card .bd{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card .n{font-size:12px;font-weight:800;color:#fff;background:var(--c);border-radius:999px;padding:3px 10px;align-self:flex-start}
+.card h3{font-size:19px;color:#004A5C}
+.card p{font-size:14px;line-height:1.45;color:#46566b;flex:1}
+.card .dl{display:flex;gap:8px;flex-wrap:wrap}
+.card .dl a{font-size:13.5px;font-weight:700;text-decoration:none;padding:8px 12px;border-radius:10px;background:#eef6fc;color:#004A5C}
+.card .dl a.m{background:var(--c);color:#fff}
+h2{font-size:24px;color:#004A5C;margin:40px 0 14px}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(11,37,69,.08);font-size:14px}
+th{background:#004A5C;color:#fff;text-align:left;padding:10px 12px;font-weight:700}
+td{padding:9px 12px;border-top:1px solid #e6edf4;vertical-align:top;line-height:1.4}
+tr.ph td{background:var(--c);color:#fff;font-weight:800;font-size:13px;letter-spacing:.06em}
+td a{font-weight:700;text-decoration:none}
+.tip{margin-top:14px;font-size:13.5px;color:#46566b;line-height:1.5}
+@media(max-width:760px){.hero{grid-template-columns:1fr}.hero h1{font-size:30px}.qrbox{max-width:200px}th:nth-child(5),td:nth-child(5){display:none}}
+</style></head><body>
+<section class="hero">
+ <div>
+  <div class="k">📁 АШЫҚ САБАҚ МАТЕРИАЛДАРЫ · ГЕОГРАФИЯ · 11-СЫНЫП</div>
+  <h1>Экосканер: қоршаған ортаның сапасы</h1>
+  <p>«Қаламның экологиялық диагнозы» · §22, 89–94-беттер<br>Бигожаева Акмарал Тургунбаевна · «№45 жалпы білім беретін мектеп» ШЖҚ МКК, Астана қ. · 13 қараша 2026</p>
+  <div class="acts"><a class="btn p" href="index.html">▶ Тақтаны ашу</a><a class="btn g" href="index.html#assess">📋 Бағалау</a><a class="btn g" href="index.html?m=h">📒 Хатшы беті</a><a class="btn g" href="index.html#sum">🏆 Қорытынды баға</a></div>
+ </div>
+ <div class="qrbox"><div id="qr"></div>Сабақ сайты</div>
+</section>
+<div class="cards" id="cards"></div>
+<h2>🗺️ Сабақ картасы</h2>
+<table id="map"></table>
+<p class="tip">💡 Наклейкаларды A4 жабысқақ қағазға түрлі түсті басыңыз. Постер инфографикасы мен қала досьесін (№4) әр топқа бір данадан беріңіз. Әр құжаттағы «сайт: N-слайд» белгісі тақтадағы кезеңге сәйкес келеді.</p>
+<script>
+const SITE = location.href.replace(/materialdar\.html.*$/, "");
+const q = qrcode(0, "H"); q.addData(SITE); q.make(); const n = q.getModuleCount(), m = 2, S = n + 2 * m; let p = "";
+for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) p += `<rect x="${c + m}" y="${r + m}" width="1.02" height="1.02" rx=".3"/>`;
+document.getElementById("qr").innerHTML = `<svg viewBox="0 0 ${S} ${S}"><g fill="#004A5C">${p}</g></svg>`;
+const F = "materialdar/";
+const M = [
+ ["1", "#0077A8", "ҚМЖ — қысқа мерзімді жоспар", "Альбомдық кесте: әр кезеңде әдіс, мұғалім мен оқушы әрекеті, дескрипторлар, сайт скриншоты және «сайт: N-слайд». Бағалау кестесі, 18 ұпай → 10 балл, сайт пен материалдардың QR-ы.", "1-QMZh-Qorshagan-orta-sapasy", [["docx", "⬇️ Word"], ["pdf", "📄 PDF"]]],
+ ["2", "#00799A", "Презентация · 20 слайд", "Сандар сөйлейді, үй тапсырмасы, топтар мен рөлдер, мақсат, бағалау, 6 спикердің 6 бөлімі, 5 тапсырма (СИ диаграммасымен), квиз, қорытынды, «Менің аспаным». Әр слайдта сайттың кезеңіне сілтеме, жазбаларда мұғалімнің сөзі мен жауап кілті.", "2-Prezentaciya-Qorshagan-orta-sapasy", [["pptx", "⬇️ PowerPoint"], ["pdf", "📄 PDF"]]],
+ ["3", "#5B5BD6", "Жұмыс парақтары №1–№8", "Жіктеу кестесі (6 спикер), «Сүзгі», «Норматив пен қауіп», әр топқа қала досьесі, галерея бағалауы, «ЖИ-ді тексер», «Адал азамат», квиздің қағаз нұсқасы, хатшы парағы және жауап кілті.", "3-Zhumys-paraqtary", [["docx", "⬇️ Word"], ["pdf", "📄 PDF"]]],
+ ["4", "#D97706", "Наклейкалар · 6 парақ", "Рөл белгілері (2 спикер, хатшы, постер қорғаушы × 3 топ), қала тақтайшалары, «Қала-сарапшылар», «2 жұлдыз, 1 тілек», «Менің аспаным», медальдар.", "4-Naklejkalar", [["pdf", "📄 PDF"]], "print/naklejka.html"],
+ ["5", "#E23A24", "Постерге дайындық инфографикасы", "3-тапсырма «Диагноз қой»: әр топқа A4 — постердің сызбасы, 7 минуттық жоспар, ластаушылар диаграммасының үлгісі, СИ/ЕЖҚ шкаласы, досье деректері, рөлдер, дескриптор және 1 минуттық қорғау сөзі. Постерді оқушылар өздері салады.", "5-Poster-infografikalar", [["pdf", "📄 PDF"]], "print/poster.html"]
+];
+document.getElementById("cards").innerHTML = M.map(x => `<div class="card" style="--c:${x[1]}"><div class="pv" style="background-image:url(${F}prev/${x[4]}.png)"></div><div class="bd"><span class="n">${x[0]}-материал</span><h3>${x[2]}</h3><p>${x[3]}</p><div class="dl">${x[5].map((d, i) => `<a class="${i ? "" : "m"}" href="${F}${x[4]}.${d[0]}" ${d[0] === "pdf" ? 'target="_blank"' : "download"}>${d[1]}</a>`).join("")}${x[6] ? `<a href="${x[6]}" target="_blank">🖨 Браузерден басу</a>` : ""}</div></div></div>`).join("");
+const SHEET = { speak: "№1 · спикер инфографикасы", t1: "№2", t2: "№3", t3: "№4 · постер инфографикасы", t4: "№5", t5: "№6", t6: "№7 (қағаз нұсқасы)", groups: "наклейка: рөлдер, тақтайшалар", feedback: "наклейка: «Менің аспаным»", sum: "наклейка: медальдар", hw: "№8 хатшы парағы" };
+const PN = DATA.parts, PC = ["", "#0E7490", "#00799A", "#0369A1", "#D97706"];
+const AS = s => DATA.desc[s.id] ? DATA.desc[s.id].map(d => d[0] + " — " + d[1]).join("<br>") + ` · <b>${DATA.points[s.id]} балл</b>` : "—";
+let h = `<tr><th>Кезең</th><th>Мин</th><th>Тақтада</th><th>Парақ / наклейка</th><th>Бағалау</th></tr>`, ph = 0, tm = 0;
+DATA.stages.forEach((s, i) => { if (!s.min) return;
+  if (s.part !== ph) { ph = s.part; h += `<tr class="ph" style="--c:${PC[ph]}"><td colspan="5">${PN[ph].toUpperCase()}</td></tr>`; }
+  h += `<tr><td><b>${s.title}</b><br><small>${s.kicker || ""}</small></td><td>${tm}–${tm + s.min}</td><td><a href="index.html#${s.id}">${i + 1}-слайд ↗</a></td><td>${SHEET[s.id] || "—"}</td><td>${AS(s)}</td></tr>`; tm += s.min; });
+document.getElementById("map").innerHTML = h;
+</script>
+</body></html>
