@@ -183,10 +183,10 @@ if (MODE !== "b") {
     <div class="ph-h"><small>Кері байланыс</small><h2>Сабақ туралы пікіріңіз</h2></div>
     <div class="card fcol"><div class="gpick" id="role"><button class="on" data-r="Мұғалім">👩‍🏫 Мұғалім</button><button data-r="Әріптес">🤝 Әріптес</button><button data-r="Қонақ">🎩 Қонақ</button></div>
     <input class="inp" id="nm" placeholder="Аты-жөніңіз (міндетті емес)" maxlength="40"><div class="stars" id="stars">${[1, 2, 3, 4, 5].map(i => `<button data-s="${i}">⭐</button>`).join("")}</div>
-    <textarea id="lk" maxlength="300" placeholder="⭐ Сабақта ұнағаны"></textarea><textarea id="wi" maxlength="300" placeholder="💡 Ұсыныс / тілек"></textarea><button class="btn" id="send">Жіберу 🚀</button></div>`;
+    <textarea id="us" maxlength="300" placeholder="✅ Ұтымды болғаны"></textarea><textarea id="lk" maxlength="300" placeholder="✨ Қызықты болғаны"></textarea><textarea id="wi" maxlength="300" placeholder="💡 Ұсыныс"></textarea><button class="btn" id="send">Жіберу 🚀</button></div>`;
     ph.onclick = e => { const r = e.target.closest("[data-r]"); if (r) $$("#role button").forEach(b => b.classList.toggle("on", b === r)); const s = e.target.closest("[data-s]"); if (s) { stars = +s.dataset.s; $$("#stars button").forEach((b, i) => b.classList.toggle("on", i < stars)); } };
-    $("#send").onclick = async () => { const rec = { role: $("#role .on").dataset.r, name: $("#nm").value.trim(), stars, like: $("#lk").value.trim(), wish: $("#wi").value.trim(), ts: Date.now() };
-      if (!rec.like && !rec.wish) { toast("Пікір жазыңыз"); return; } try { if (LIVE.on()) await LIVE.pushNote(rec); else store.set("notes", [...store.get("notes", []), rec]); ph.innerHTML = `<div class="ph-h done"><small>Рахмет!</small><h2>Пікіріңіз тақтаға жіберілді ✅</h2></div>`; } catch { toast("Жіберілмеді, қайта байқап көріңіз"); } };
+    $("#send").onclick = async () => { const rec = { role: $("#role .on").dataset.r, name: $("#nm").value.trim(), stars, use: $("#us").value.trim(), like: $("#lk").value.trim(), wish: $("#wi").value.trim(), ts: Date.now() };
+      if (!rec.use && !rec.like && !rec.wish) { toast("Пікір жазыңыз"); return; } try { if (LIVE.on()) await LIVE.pushNote(rec); else store.set("notes", [...store.get("notes", []), rec]); ph.innerHTML = `<div class="ph-h done"><small>Рахмет!</small><h2>Пікіріңіз тақтаға жіберілді ✅</h2></div>`; } catch { toast("Жіберілмеді, қайта байқап көріңіз"); } };
   }
   function join() {
     let g = null;
@@ -210,9 +210,9 @@ if (MODE !== "b") {
     open = id;
     if (id === "self") {
       ph.innerHTML = `${top()}<div class="ph-h"><small>Рефлексия</small><h2>Менің аспаным қандай?</h2></div><div class="card"><div class="sky">${DATA.selfCheck.map(([i, t], k) => `<button data-sk="${k}" class="${store.get("mySky", null) === k ? "on" : ""}"><i>${i}</i>${t}</button>`).join("")}</div>
-      <textarea id="sn" maxlength="200" placeholder="Эко-уәдем: «Мен … »" style="margin-top:10px"></textarea><button class="btn" id="sv" style="margin-top:10px">Тақтаға жіберу 🚀</button></div><button class="btn lt" id="bk">← Тапсырмалар</button>`;
+      <textarea id="su" maxlength="200" placeholder="✅ Ұтымды болғаны" style="margin-top:10px"></textarea><textarea id="sn" maxlength="200" placeholder="✨ Қызықты болғаны" style="margin-top:8px"></textarea><textarea id="sw" maxlength="200" placeholder="💡 Ұсынысым" style="margin-top:8px"></textarea><button class="btn" id="sv" style="margin-top:10px">Тақтаға жіберу 🚀</button></div><button class="btn lt" id="bk">← Тапсырмалар</button>`;
       ph.onclick = e => { const b = e.target.closest("[data-sk]"); if (b) { store.set("mySky", +b.dataset.sk); push(); $$(".sky button").forEach(x => x.classList.toggle("on", x === b)); } if (e.target.id === "bk") hub(); };
-      $("#sv").onclick = async () => { const t = $("#sn").value.trim(); if (!t) { toast("Сөйлемді жаз"); return; } const rec = { role: "Оқушы", name: me()?.name || "", like: t, sky: store.get("mySky", null), ts: Date.now() }; try { if (LIVE.on()) await LIVE.pushNote(rec); else store.set("notes", [...store.get("notes", []), rec]); toast("Жіберілді! ✅"); $("#sn").value = ""; } catch { toast("Жіберілмеді"); } };
+      $("#sv").onclick = async () => { const t = $("#sn").value.trim(), u = $("#su").value.trim(), w = $("#sw").value.trim(); if (!t && !u && !w) { toast("Бір жолын жаз"); return; } const rec = { role: "Оқушы", name: me()?.name || "", like: t, use: u, wish: w, sky: store.get("mySky", null), ts: Date.now() }; try { if (LIVE.on()) await LIVE.pushNote(rec); else store.set("notes", [...store.get("notes", []), rec]); toast("Жіберілді! ✅"); $("#sn").value = ""; $("#su").value = ""; $("#sw").value = ""; } catch { toast("Жіберілмеді"); } };
       return;
     }
     const s = ST.find(x => x.id === id);
@@ -257,7 +257,7 @@ function clkDraw() {
   $("#clk").textContent = `${String(Math.floor(r / 60)).padStart(2, "0")}:${String(r % 60).padStart(2, "0")}`; $("#clkS").textContent = r ? "сабақ ↺" : "аяқталды"; $("#clock").classList.add("on");
 }
 setInterval(clkDraw, 1000); clkDraw();
-async function newSession() {
+async function newSession() { store.del("gl"); store.del("mood"); store.del("bonus");
   ["left", "bonus", "notes", "skyB"].forEach(k => store.del(k)); Object.keys(left).forEach(k => delete left[k]);
   let n = 0;
   if (LIVE.on()) { try { n = await LIVE.count(); await LIVE.clear(); await LIVE.setSession("s" + Date.now().toString(36)); } catch { toast("⚠️ Firebase-ті тазалау мүмкін болмады"); } }
@@ -314,10 +314,10 @@ const R = {
       <p class="inv-t">Пән мұғалімі: <b>${esc(L.teacher)}</b><br>${esc(L.school)}</p></div></div>
       <div class="inv-side"><div class="card fcol c"><div class="lbl">Қонақтарға · кері байланыс</div><div class="qrbox">${qrSvg(link("g"))}</div><p class="muted sm">Сабақ соңында пікіріңізді осы QR арқылы қалдырыңыз</p></div>
       <button class="btn big go" id="startBtn">▶ Сабақты бастау</button><p class="muted sm c">Басқанда 45 минуттық сағат іске қосылады, дайындық нәтижелері тазаланады</p></div></div></div>`,
-  welcome: s => `<div class="st">${HD(s, "Құрметті қонақтар, жас сарапшылар! Бүгін біз қоршаған ортаның «анализін» оқуды үйренеміз.")}<div class="body wel2">
-      <div class="hook" style="background-image:url(media/p3.jpg)"><div class="hook-in"><span class="phen">Феномен: неге қыста Астананың үстінде түтін тұрады?</span><div class="lbl">Астана: жеке үйлердің 73–80%-ы көмірмен жылытылады · 2026 жылғы нақты деректер</div><h3>Бұлардың қайсысы қауіпті? Оны қалай білеміз?</h3>
-      <div class="hooks">${DATA.hook.map(([a, b], i) => `<div style="animation-delay:${.3 + i * .2}s"><em>?</em><b>${a}</b><span>${esc(b)}</span></div>`).join("")}</div><div class="lbl" style="margin-top:14px">🧪 Тәжірибе: екі банка қар сүзгіде — қай сүзгі қараяды? Жауабы сабақ соңында!</div></div></div>
-      <div class="card fcol c join"><div class="lbl">Бүгін телефон тек бекітуге</div><p style="font-size:44px;margin:6px 0">📵 → 📱</p><p class="muted sm">Тапсырмалар тақтада, жұмыс парағында және постерде. Телефон — тек 6-тапсырма «Жедел сканер» квизінде.</p><div class="groups">${Object.entries(DATA.groups).map(([k, g]) => `<div style="--gc:${g.c}"><i>${g.i}</i>${g.n}<b data-gc="${k}">0</b></div>`).join("")}</div><div class="bigjoin" hidden><b class="join-n">—</b></div></div></div></div>`,
+  welcome: s => { const ros = store.get("roster", []); const MOOD = [["☀️", "Шуақты"], ["🌤️", "Ашық"], ["⛅", "Бұлтты"], ["🌧️", "Жаңбырлы"]], mc = store.get("mood", [0, 0, 0, 0]);
+    return `<div class="st">${HD(s, "Құрметті қонақтар, жас сарапшылар! Бүгін біз қоршаған ортаның «анализін» оқимыз. Алдымен — сыныптың «ауа райы».")}<div class="body wel3">
+      <div class="card mood"><h3>🌦️ Бүгінгі көңіл-күйің — қандай ауа райы?</h3><p class="muted">Әр оқушы бір сөзбен айтады, мұғалім басып санайды. Соңында: «Сабақ соңында бәріміздің аспанымыз ашық болсын!»</p><div class="moodb">${MOOD.map(([i, t], k) => `<button data-md="${k}"><i>${i}</i><span>${t}</span><b>${mc[k] || 0}</b></button>`).join("")}</div></div>
+      <div class="card"><h3>👥 Топтар мен рөлдер</h3><div class="wgr">${GK.map(g => { const G = DATA.groups[g], m = ros.filter(r => r.g === g); return `<div style="--gc:${G.c}"><b>${G.i} ${esc(G.n)}</b>${m.length ? `<ol>${m.map(r => `<li>${esc(r.name)}${r.role ? ` <em>${ROLE[r.role]}</em>` : ""}</li>`).join("")}</ol>` : `<p class="muted sm">⚙ → «Топтарды теңдестіру»</p>`}</div>`; }).join("")}</div><div class="wqr"><div class="qrbox s">${qrSvg(link("h"))}</div><small>📒 Хатшыларға: сканерлеп, тобыңды таңда</small></div></div></div></div>`; },
   goals: s => `<div class="st">${HD(s, `Оқу мақсаты: <b>${esc(L.goal)}</b>`)}<div class="body cols2"><div class="card"><h3>🎯 Бағалау критерийлері</h3><div class="crit">${DATA.criteria.map(([k, d, t]) => `<div><b>${k}</b><span>${esc(d)}<small> · ${t}</small></span></div>`).join("")}</div></div>
     <div class="card"><h3>📈 Күтілетін нәтиже</h3><div class="tiers">${DATA.tiers.map(([a, b], i) => `<div style="animation-delay:${.3 + i * .15}s"><b>${a}:</b> ${esc(b)}</div>`).join("")}</div><p class="muted sm" style="margin-top:14px">Оқулық §22 (89–94-б.) + Қазгидромет 2026 бюллетендерінің нақты деректері. Феноменге негізделген оқыту: жергілікті (Астана, Қарағанды обл.) деректер арқылы жалпы заңдылықты түсінеміз.</p></div></div></div>`,
   rules: s => `<div class="st">${HD(s, "Сарапшылар кодексі")}<div class="body rules">${DATA.rules.map(([i, t, d], k) => `<div class="card rule" data-n="${k + 1}" style="animation-delay:${k * .1}s"><div class="ic">${i}</div><h4>${esc(t)}</h4><p>${esc(d)}</p></div>`).join("")}</div></div>`,
@@ -328,22 +328,23 @@ const R = {
   speak: s => { const ros = store.get("roster", []); const nm = (g, r) => (ros.find(x => x.g === g && x.role === r) || {}).name || (r === "sp1" ? "1-спикер" : "2-спикер");
     const SP = DATA.learnTabs.map((t, i) => ({ i, g: GK[Math.floor(i / 2)], r: i % 2 ? "sp2" : "sp1" }));
     return `<div class="st">${HD(s, "Спикер ғалымның рөліне кіреді: «Мен — …мын. Бүгін мен … түсіндіремін». Экрандағы инфографикаға сүйеніп, қарапайым тілмен 1 минут сөйлейді. Қалғандары №1 кестені толтырады.", "ЖАҢА САБАҚ")}<div class="body learn"><div class="lnav" id="lnav">${SP.map(x => { const G = DATA.groups[x.g]; return `<button data-sp="${x.i}" style="border-bottom:5px solid ${G.c}">${esc(DATA.learnTabs[x.i].t)}<small style="display:block;font-weight:700">🎭 ${esc(nm(x.g, x.r))} — ${esc(SCIN[x.i])} · ${G.i}</small></button>`; }).join("")}<span class="sptim" id="sptim"></span></div><div id="lbox"></div></div></div>`; },
-  video: s => `<div class="st">${HD(s, "1 минут 55 секунд: оқулықтағы 4 сызба + Қазгидрометтің 2026 жылғы нақты деректері")}<div class="body vid"><div class="card" style="padding:10px"><video controls preload="metadata" poster="media/poster.jpg" playsinline><source src="media/ekoskaner.mp4" type="video/mp4"></video></div></div></div>`,
+  video: s => `<div class="st">${HD(s, "Бейнені мұқият көр: жауаптары глобус сұрақтарында керек болады! Соңында тақырып пен мақсат ашылады.")}<div class="body vid2"><div class="card" style="padding:10px"><video id="vd" controls preload="metadata" poster="media/poster.jpg" playsinline><source src="media/ekoskaner.mp4" type="video/mp4"></video></div>
+    <div class="card goalc" id="goalc"><button class="btn" id="goalBtn">🎯 Тақырып пен мақсатты ашу</button><div class="goalin" hidden><div class="lbl">Тақырып</div><h3>${esc(L.topic)} <small>(${esc(L.para)})</small></h3><div class="lbl">Оқу мақсаты</div><p>${esc(L.goal)}</p><div class="lbl">Бүгін сен</div>${DATA.tiers.map(([a, b]) => `<p class="tier"><b>${esc(a)}:</b> ${esc(b)}</p>`).join("")}<div class="lbl">Бағалау</div><p class="sm">${TASKS.map(k => `${esc((ST.find(x => x.id === k) || {}).title || k)} — ${PTS[k]}`).join(" · ")} · барлығы ${MAXP} ұпай → 10 балл</p></div></div></div></div>`,
+  globe: s => `<div class="st">${HD(s, "Глобус әлемнен Қазақстанға айналады. Оқушы кездейсоқ таңдалады → тақтаға шығып жауапты басады → бірден дұрыс/қате және балл.")}<div class="body glb" id="glwrap"><div class="card glc"><canvas id="glcv"></canvas><div class="gltop"><span id="glLv">🌍 → 🇰🇿</span><span id="glN"></span><button id="glReset" title="Басынан">↺</button></div></div><div class="glside"><div class="card" id="glQ"></div><div class="card glg"><div class="lbl">Топтардың дұрыс жауабы</div><div id="glG"></div></div></div></div></div>`,
   learn: s => `<div class="st">${HD(s, "Оқулықтағы 25–28-сызбалар · әр қадамда нақты мысал және жедел сұрақ", "ЖАҢА САБАҚ")}<div class="body learn"><div class="lnav" id="lnav">${DATA.learnTabs.map((t, i) => `<button data-l="${i}">${esc(t.t)}</button>`).join("")}</div><div id="lbox" class="lbox"></div></div></div>`,
   t1: s => `<div class="st">${HD(s, "8 көрсеткішті 4 ортаға жікте: А — ауа, С — су, Т — топырақ, Ж — табиғи жүйелер. <b>Үлгі:</b> «PM2.5 · Қарағанды» → <b>А</b>.", modeBadge(s))}<div class="body task">${howStrip("t1")}<div class="card tk" id="tk"></div>${descPanel("t1")}</div></div>`,
   t2: s => `<div class="st">${HD(s, "Жұбыңмен №3 парақта: 3 нормативтің түрін және 3 заттың қауіп класын белгіле. <b>Үлгі:</b> «Озон» → <b>I класс</b> (өте қауіпті).", modeBadge(s))}<div class="body task">${howStrip("t2")}<div class="card tk" id="tk"></div>${descPanel("t2")}</div></div>`,
-  t3: s => `<div class="st">${HD(s, "Топ өз қаласының досьесін оқиды → ватманға жазады: <b>«Біздің қала — … деңгей, себебі СИ = …; басты ластаушы — …; ұсынысымыз — …»</b> → 1 минут қорғайды.", modeBadge(s))}<div class="body t3b">${howStrip("t3")}<div class="dos3">${Object.keys(DATA.groups).map(g => { const D = DATA.t3[g], G = DATA.groups[g];
+  t3: s => `<div class="st">${HD(s, "Топ өз қаласының досьесін оқиды → ватманға жазады: <b>«Біздің қала — … деңгей, себебі СИ = …; басты ластаушы — …; ұсынысымыз — …»</b> → 1 минут қорғайды.", modeBadge(s))}<div class="body t3b">${howStrip("t3")}<div class="ptim"><button data-pt="180" data-l="Постерге дайындық">⏱ 3 мин дайындық</button>${GK.map(g => `<button data-pt="120" data-l="${esc(DATA.groups[g].n)} қорғайды" style="--gc:${DATA.groups[g].c}">🎤 ${DATA.groups[g].i} ${esc(DATA.groups[g].city)} · 2 мин</button>`).join("")}<span class="sptim" id="sptim"></span></div><div class="dos3">${Object.keys(DATA.groups).map(g => { const D = DATA.t3[g], G = DATA.groups[g];
       return `<div class="dos" style="--gc:${G.c}"><div class="dos-h">${G.i} <b>${esc(G.n)}</b><span>${esc(D.period)}</span></div><div class="dos-g">${gauge(D.si, D.ez)}<div class="dos-k"><div><small>СИ</small><b>${fmt(D.si)}</b></div><div><small>ЕЖҚ</small><b>${fmt(D.ez)}%</b></div></div></div>${hbars(D.air.slice(0, 4), Math.max(...D.air.map(a => a[1])) * 1.1)}<ul class="dos-f">${D.facts.slice(0, 2).map(f => `<li>${esc(f)}</li>`).join("")}</ul>
       <div class="dos-r" id="gr-${g}"><p class="muted sm">Топтың жауабы күтілуде… 📡</p></div><div class="bon">Қорғау: <button data-bonus="${g}" data-v="1">+1</button><button data-bonus="${g}" data-v="2">+2</button><b id="bo-${g}"></b></div></div>`; }).join("")}</div>
       </div></div>`,
   t4: s => `<div class="st">${HD(s, "Оқулық пен ЖИ: «0,996 &lt; 1 — нормада». Тексер: 0,345 : 0,35 = <b>0,986</b> (берілген) → 0,009 : 0,01 = ? → қосынды = ? → нормада ма?", modeBadge(s))}<div class="body task">${howStrip("t4")}<div class="card tk" id="tk"></div>${descPanel("t4")}</div></div>`,
   t5: s => `<div class="st">${HD(s, "А. 27-сызба: мониторингтің 4 кезеңін ретімен нөмірле. Б. Жағдаят: ластануды көрсең, заңды әрекетті таңда.", modeBadge(s))}<div class="body task">${howStrip("t5")}<div class="card tk" id="tk"></div>${descPanel("t5")}</div></div>`,
   t6: s => `<div class="st">${HD(s, "Телефонды ал → QR → атың → 6 сұрақ. Жүйе бірден тексереді.", modeBadge(s))}<div class="body task">${howStrip("t6")}<div class="card tk" id="tk"></div>${resPanel("t6")}</div></div>`,
-  sum: s => `<div class="st">${HD(s, "Сканерлеу аяқталды: не үйрендік, кім үздік, қай критерийді меңгердік?", "ҚОРЫТЫНДЫ")}<div class="body sumb">
-    <div class="card"><h3>🏆 Үздік сарапшылар</h3><div class="lead" id="lead"><p class="muted">Нәтижелер Firebase арқылы тірі шығады.</p></div><h3 style="margin-top:14px">Топтар</h3><div class="gbars" id="gbars"></div></div>
-    <div class="card"><h3>📊 Критерийлерді меңгеру (сынып)</h3><div class="kbars" id="kbars"></div><div class="live" id="clsBox" style="margin-top:14px"></div></div>
-    <div class="card"><h3>🌳 Жіктеу ағашы</h3><div class="tree2"><div class="tr-root">Қоршаған орта сапасы</div><div class="tr-br">${[["Ортасы", "ауа · су · топырақ · экожүйе"], ["Норматив", "4 түр · I–IV класс"], ["Деңгей", "СИ/ЕЖҚ · су 1–6 класс"], ["Мониторинг", "4 кезең · 3 әдіс · 4 деңгей"]].map(([a, b], i) => `<div style="animation-delay:${.3 + i * .2}s"><b>${a}</b><small>${b}</small></div>`).join("")}</div></div><div class="vlist">${DATA.verdict.map((v, i) => `<div style="animation-delay:${1 + i * .2}s">${esc(v)}</div>`).join("")}</div></div></div></div>`,
-  feedback: s => `<div class="st">${HD(s, "Оқушылар: «Менің аспаным» + эко-уәде · Мұғалімдер, әріптестер, қонақтар: жұлдыз + ұнағаны + ұсыныс")}<div class="body fb"><div class="card fcol"><h3>☀️ Сыныптың аспаны</h3><div class="sky" id="sky">${DATA.selfCheck.map(([i, t], k) => `<button data-sk="${k}"><i>${i}</i>${t}<b>0</b></button>`).join("")}</div>
+  sum: s => `<div class="st">${HD(s, `Хатшылардың балы + глобус + квиз → ${MAXP} ұпай → 10 балл. 8–10 жоғары · 4–7 орта · 1–3 төмен.`)}<div class="body sum3">
+    <div class="card"><h3>🏅 Үздіктер</h3><div class="meds" id="meds"><p class="muted">Нәтижелер Firebase арқылы шығады.</p></div><h3 style="margin-top:12px">👥 Топтар</h3><div class="gbars" id="gbars"></div></div>
+    <div class="card"><h3>📋 Барлық оқушының рейтингі</h3><div class="allr" id="allr"><p class="muted">Әзірге нәтиже жоқ.</p></div></div></div></div>`,
+  feedback: s => `<div class="st">${HD(s, "Оқушылар мен мұғалімдер телефоннан жазады: ✅ Ұтымды · ✨ Қызықты · 💡 Ұсыныс")}<div class="body fb"><div class="card fcol"><h3>☀️ Сыныптың аспаны</h3><div class="sky" id="sky">${DATA.selfCheck.map(([i, t], k) => `<button data-sk="${k}"><i>${i}</i>${t}<b>0</b></button>`).join("")}</div>
     <div class="fbqr"><div><div class="qrbox s">${qrSvg(link("s", "feedback"))}</div><small>Оқушыларға</small></div><div><div class="qrbox s">${qrSvg(link("g"))}</div><small>Қонақтарға</small></div></div><p class="muted sm" id="starAvg">⭐ Қонақтардың бағасы осында шығады</p></div>
     <div class="card fcol wallc"><div class="tabs" id="wtabs"><button class="on" data-w="all">Барлығы</button><button data-w="s">🎓 Оқушылар</button><button data-w="g">🎩 Мұғалімдер мен қонақтар</button><span class="wn" id="wn"></span></div><div class="wall" id="wall"></div></div></div></div>`,
   home: s => `<div class="st">${HD(s, "Сканер жұмысын жалғастырамыз — енді өз ауданыңда!")}<div class="body hw">${DATA.homework.map((h, i) => `<div class="card hwc" style="animation-delay:${i * .15}s"><div class="big3">${h.i}</div><span class="pill lv">${esc(h.lv)}</span><p>${esc(h.t)}</p></div>`).join("")}</div></div>`,
@@ -364,6 +365,7 @@ let spT = null, actx = null;
 function beep(f, d) { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = f; g.gain.value = .15; o.connect(g).connect(actx.destination); o.start(); g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + d); o.stop(actx.currentTime + d + .05); } catch {} }
 function spkTimer(sec, label) { clearInterval(spT); let l = sec; const draw = () => { const e = $("#sptim"); if (!e) { clearInterval(spT); return; } e.textContent = `⏱ ${label} · 0${Math.floor(l / 60)}:${String(l % 60).padStart(2, "0")}`; e.style.color = l <= 10 ? "#B91C1C" : ""; };
   draw(); spT = setInterval(() => { l--; if (l <= 10 && l > 0) beep(988, .08); if (l <= 0) { clearInterval(spT); beep(659, .4); setTimeout(() => beep(988, .6), 250); toast("⏰ Спикердің уақыты бітті"); } draw(); }, 1000); }
+function spkNow(i, b) { const lb = $("#lbox"); if (!lb) return; const t = b.querySelector("small").textContent.replace("🎭 ", ""); lb.insertAdjacentHTML("afterbegin", `<div class="spknow">🎭 <b>${esc(t.split(" · ")[0])}</b><span>${esc(DATA.learnTabs[i].t)}</span></div>`); }
 function learn(i) {
   lt = i; const T = DATA.learnTabs[i];
   $("#lbox").innerHTML = `<div class="lpane">${LEARN[i]()}</div><div class="lfoot"><div class="ask">❓ <b>Жедел сұрақ:</b> ${esc(T.ask)}</div><div class="src2">📚 ${esc(T.src)}</div></div>`;
@@ -374,12 +376,87 @@ function render() {
   const s = ST[cur]; document.body.dataset.part = s.part; $("#main").innerHTML = R[s.id](s); seen.clear();
   if (!$("#main .stu") && s.id !== "invite") { const hd = $("#main .hd"), sb = stuBar(s.id); if (sb) { if (hd) hd.insertAdjacentHTML("afterend", sb); else $("#main").insertAdjacentHTML("afterbegin", sb); } }
   if (s.id === "invite") $("#startBtn").onclick = () => clkStart ? go(1, true) : startLesson();
-  if (s.id === "speak") { $("#lnav").onclick = e => { const b = e.target.closest("[data-sp]"); if (!b) return; const i = +b.dataset.sp; learn(i); spkTimer(60, b.querySelector("small").textContent); }; learn(0); }
+  if (s.id === "speak") { $("#lnav").onclick = e => { const b = e.target.closest("[data-sp]"); if (!b) return; const i = +b.dataset.sp; learn(i); spkNow(i, b); spkTimer(60, b.querySelector("small").textContent); $$("#lnav [data-sp]").forEach(x => x.classList.toggle("on", x === b)); }; learn(0); }
   if (s.id === "learn") { learn(lt); $("#lnav").onclick = e => { const b = e.target.closest("[data-l]"); if (b) learn(+b.dataset.l); }; }
   if (TASK[s.id] && $("#tk")) TASK[s.id]($("#tk"));
+  if (s.id === "t3") $$("[data-pt]").forEach(b => b.onclick = () => spkTimer(+b.dataset.pt, b.dataset.l));
+  if (s.id === "globe") globeInit();
+  if (s.id === "video") { const rv = () => { $("#goalBtn").hidden = true; $(".goalin").hidden = false; }; $("#goalBtn").onclick = rv; const v = $("#vd"); if (v) v.onended = rv; }
+  if (s.id === "welcome") $$("[data-md]").forEach(b => b.onclick = () => { const m = store.get("mood", [0, 0, 0, 0]); m[+b.dataset.md]++; store.set("mood", m); $("b", b).textContent = m[+b.dataset.md]; beep(700, .08); });
   if (s.id === "t3") $$("[data-bonus]").forEach(b => b.onclick = async () => { const g = b.dataset.bonus, bo = store.get("bonus", {}); bo[g] = +b.dataset.v; store.set("bonus", bo); if (LIVE.on()) try { await LIVE.pushGroup(g + "/bonus", bo[g]); } catch {} toast(`${DATA.groups[g].n}: қорғау +${bo[g]}`); liveTick(); });
   if (s.id === "feedback") { $("#wtabs").onclick = e => { const b = e.target.closest("[data-w]"); if (b) { wtab = b.dataset.w; $$("#wtabs button").forEach(x => x.classList.toggle("on", x === b)); liveTick(); } }; }
   liveTick();
+}
+
+/* ---------- 3D глобус: әлемнен Қазақстанға, кездейсоқ оқушы, бірден дұрыс/қате ---------- */
+const sidOf = n => "r_" + Array.from(nrm(n)).map(c => c.charCodeAt(0).toString(36)).join("").slice(0, 60);
+let GW = null, glAnim = 0, glRot = [-20, -20], glScale = 1;
+async function globeInit() {
+  const cv = $("#glcv"); if (!cv) return;
+  if (!GW) { try { const w = await (await fetch("vendor/countries-110m.json")).json(); GW = { land: topojson.feature(w, w.objects.countries), kz: topojson.feature(w, w.objects.countries).features.find(f => f.id === "398") }; } catch { GW = { land: null }; } }
+  const Q = DATA.globeQ, st = () => store.get("gl", { qi: -1, done: {}, pts: {}, grp: {}, picked: [] }), save = v => store.set("gl", v);
+  const ctx = cv.getContext("2d"), DPR = Math.min(2, window.devicePixelRatio || 1);
+  const size = () => { const r = cv.getBoundingClientRect(); cv.width = r.width * DPR; cv.height = r.height * DPR; };
+  size();
+  const proj = d3.geoOrthographic().clipAngle(90), path = d3.geoPath(proj, ctx), grat = d3.geoGraticule10();
+  const draw = (t) => {
+    const W = cv.width, H = cv.height, R = Math.min(W, H) * .44 * glScale;
+    proj.translate([W / 2, H / 2]).scale(R).rotate(glRot);
+    ctx.clearRect(0, 0, W, H);
+    const g = ctx.createRadialGradient(W / 2 - R * .35, H / 2 - R * .4, R * .1, W / 2, H / 2, R * 1.05);
+    g.addColorStop(0, "#7DD3FC"); g.addColorStop(.55, "#0EA5E9"); g.addColorStop(1, "#075985");
+    ctx.beginPath(); ctx.arc(W / 2, H / 2, R * 1.04, 0, 7); ctx.fillStyle = "rgba(14,165,233,.18)"; ctx.fill();
+    ctx.beginPath(); path({ type: "Sphere" }); ctx.fillStyle = g; ctx.fill();
+    ctx.beginPath(); path(grat); ctx.strokeStyle = "rgba(255,255,255,.18)"; ctx.lineWidth = DPR; ctx.stroke();
+    if (GW.land) { ctx.beginPath(); path(GW.land); ctx.fillStyle = "#86EFAC"; ctx.fill(); ctx.strokeStyle = "rgba(6,78,59,.45)"; ctx.lineWidth = .7 * DPR; ctx.stroke();
+      ctx.beginPath(); path(GW.kz); ctx.fillStyle = "#FBBF24"; ctx.fill(); ctx.strokeStyle = "#92400E"; ctx.lineWidth = 1.4 * DPR; ctx.stroke(); }
+    const s = st(); Q.forEach((q, i) => { const c = [q.lon, q.lat], d = d3.geoDistance(c, [-glRot[0], -glRot[1]]); if (d > 1.5) return; const [x, y] = proj(c);
+      const act = i === s.qi, dn = s.done[i] != null, r = (act ? 11 : 7) * DPR;
+      if (act) { ctx.beginPath(); ctx.arc(x, y, r + (6 + 5 * Math.sin(t / 220)) * DPR, 0, 7); ctx.fillStyle = "rgba(220,38,38,.25)"; ctx.fill(); }
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fillStyle = dn ? (s.done[i] ? "#16A34A" : "#DC2626") : act ? "#DC2626" : "#fff"; ctx.fill(); ctx.lineWidth = 2 * DPR; ctx.strokeStyle = "#0B2545"; ctx.stroke();
+      ctx.fillStyle = dn || act ? "#fff" : "#0B2545"; ctx.font = `800 ${(act ? 12 : 9) * DPR}px Golos Text, sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(String(i + 1), x, y + .5);
+      if (act || glScale > 2) { ctx.font = `700 ${12 * DPR}px Golos Text, sans-serif`; ctx.fillStyle = "#0B2545"; ctx.strokeStyle = "rgba(255,255,255,.9)"; ctx.lineWidth = 4 * DPR; ctx.strokeText(q.p, x, y - r - 9 * DPR); ctx.fillText(q.p, x, y - r - 9 * DPR); } });
+  };
+  let target = null, from = null, t0 = 0, idle = true;
+  const loop = t => { if (!$("#glcv")) { cancelAnimationFrame(glAnim); return; }
+    if (target) { const k = Math.min(1, (t - t0) / 1600), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; const ip = d3.geoInterpolate(from.c, target.c)(e); glRot = [-ip[0], -ip[1]]; glScale = from.s + (target.s - from.s) * e; if (k >= 1) target = null; }
+    else if (idle) glRot = [glRot[0] + .08, glRot[1]];
+    draw(t); glAnim = requestAnimationFrame(loop); };
+  cancelAnimationFrame(glAnim); glAnim = requestAnimationFrame(loop);
+  const fly = (lon, lat, sc) => { from = { c: [-glRot[0], -glRot[1]], s: glScale }; target = { c: [lon, lat], s: sc }; t0 = performance.now(); idle = false; };
+  window.onresize = size;
+  const ros = () => store.get("roster", []);
+  const paint = () => { const s = st(), q = Q[s.qi];
+    $("#glN").textContent = s.qi < 0 ? `${Q.length} сұрақ` : `${s.qi + 1} / ${Q.length}`;
+    $("#glLv").textContent = q ? (q.lv === "Әлем" ? "🌍 Әлем" : "🇰🇿 Қазақстан") : "🌍 → 🇰🇿";
+    $("#glG").innerHTML = GK.map(g => { const G = DATA.groups[g]; return `<div style="--gc:${G.c}"><span>${G.i} ${esc(G.city)}</span><b>${s.grp[g] || 0}</b></div>`; }).join("");
+    const box = $("#glQ");
+    if (!q) { box.innerHTML = `<div class="glstart"><h3>Глобус-эстафета</h3><p>Глобус әлемнен Қазақстанға қарай айналады. Әр нүктеде — бейне мен спикерлер айтқан сұрақ. Оқушы кездейсоқ таңдалады, тақтаға шығып жауапты басады.</p><button class="btn" id="glNext">▶ Бастау</button></div>`; return; }
+    const pk = s.cur, ord = s.ord || [0, 1, 2, 3], ans = s.done[s.qi];
+    box.innerHTML = `<div class="glq"><div class="glp">📍 ${esc(q.p)} <small>${esc(q.src)}</small></div><h3>${esc(q.q)}</h3>
+      <div class="glwho">${pk ? `<span style="--gc:${DATA.groups[pk.g]?.c || "#00799A"}">🎯 ${esc(pk.name)} <small>${DATA.groups[pk.g]?.i || ""} ${esc(DATA.groups[pk.g]?.city || "")}</small></span>` : `<button class="btn" id="glPick">🎲 Оқушыны таңда</button>`}</div>
+      <div class="glo">${ord.map(j => `<button data-ga="${j}" ${!pk || ans != null ? "disabled" : ""} class="${ans != null ? (j === q.a ? "ok" : (s.sel === j ? "no" : "")) : ""}">${esc(q.o[j])}</button>`).join("")}</div>
+      ${ans != null ? `<div class="glres ${ans ? "ok" : "no"}">${ans ? `✅ Дұрыс! +1 балл — ${esc(pk?.name || "")}` : `❌ Қате. Дұрыс жауап: <b>${esc(q.o[q.a])}</b>`} <small>${esc(q.src)}</small></div><button class="btn" id="glNext">${s.qi + 1 < Q.length ? "➡ Келесі нүкте" : "🏁 Аяқтау"}</button>` : ""}</div>`;
+  };
+  const next = () => { const s = st(); s.qi = Math.min(Q.length, s.qi + 1); s.cur = null; s.sel = null; s.ord = shuffle([0, 1, 2, 3]); save(s);
+    const q = Q[s.qi]; if (q) fly(q.lon, q.lat, q.lv === "Әлем" ? 1.15 : 2.6); else { fly(68, 48, 1.6); }
+    if (!q) { $("#glQ").innerHTML = `<div class="glstart"><h3>🏁 Глобус аяқталды!</h3><p>Барлығы ${Q.length} нүкте. Дұрыс жауаптар: ${Object.values(s.done).filter(Boolean).length}.</p></div>`; $("#glN").textContent = "✓"; return; }
+    paint(); };
+  const pick = () => { const s = st(), R = ros(); let pool = R.filter(r => !s.picked.includes(nrm(r.name)));
+    if (R.length && !pool.length) { s.picked = []; pool = R; }
+    const box = $(".glwho"); let n = 0;
+    const final = R.length ? pool[Math.floor(Math.random() * pool.length)] : { name: "", g: GK[Math.floor(Math.random() * GK.length)] };
+    const spin = setInterval(() => { const r = R.length ? R[n++ % R.length] : { name: "", g: GK[n++ % GK.length] }; box.innerHTML = `<span class="spin" style="--gc:${DATA.groups[r.g]?.c}">🎲 ${esc(r.name || DATA.groups[r.g].n)}</span>`; beep(500 + (n % 5) * 80, .05); }, 90);
+    setTimeout(() => { clearInterval(spin); const s2 = st(); s2.cur = { name: final.name || `${DATA.groups[final.g].n}: кез келген оқушы`, g: final.g, real: !!final.name }; if (final.name) s2.picked.push(nrm(final.name)); save(s2); beep(880, .25); paint(); }, 1600); };
+  const answer = j => { const s = st(), q = Q[s.qi]; if (s.done[s.qi] != null || !s.cur) return; const ok = j === q.a; s.done[s.qi] = ok; s.sel = j;
+    if (ok) { s.grp[s.cur.g] = (s.grp[s.cur.g] || 0) + 1; if (s.cur.real) { const k = nrm(s.cur.name); s.pts[k] = (s.pts[k] || 0) + 1;
+      if (LIVE.on()) LIVE.putStudent(sidOf(s.cur.name) + "gl", { name: s.cur.name, g: s.cur.g, sc: { globe: Math.min(PTS.globe, s.pts[k]) }, at: { globe: Date.now() }, src: "hatshy", ts: Date.now() }).catch(() => {}); } beep(660, .12); setTimeout(() => beep(990, .2), 130); }
+    else { beep(220, .35); }
+    save(s); paint(); };
+  $("#glwrap").onclick = e => { if (e.target.closest("#glNext")) next(); else if (e.target.closest("#glPick")) pick(); else { const b = e.target.closest("[data-ga]"); if (b) answer(+b.dataset.ga); } };
+  $("#glReset").onclick = () => { if (confirm("Глобусты басынан бастаймыз ба?")) { store.del("gl"); fly(30, 20, 1); paint(); } };
+  const s = st(); if (Q[s.qi]) { const q = Q[s.qi]; glRot = [-q.lon, -q.lat]; glScale = q.lv === "Әлем" ? 1.15 : 2.6; idle = false; }
+  paint();
 }
 
 /* ---------- тірі деректер ---------- */
@@ -408,18 +485,19 @@ async function liveTick() {
     if (sub) box.innerHTML = `<div class="sub"><div class="ans">${sub.ans.map((a, i) => `<span class="${a === DATA.t3.qs[i].o[DATA.t3[g].a[i]] ? "ok" : "no"}">${i + 1}) ${esc(a)}</span>`).join("")}</div>${sub.idea ? `<p class="idea">💡 ${esc(sub.idea)}</p>` : ""}<div class="gsc">${sub.ok}/3 ${bonus[g] ? `+ ${bonus[g]}` : ""} · ${esc(sub.by)}</div></div>`; });
   if (id === "sum") {
     const rows = studs.map(x => ({ ...x, T: totOf(x) })).sort((a, b) => b.T - a.T);
-    if (rows.length) $("#lead").innerHTML = rows.slice(0, 6).map((x, i) => `<div><i>${["🥇", "🥈", "🥉"][i] || i + 1}</i><span>${esc(x.name)} ${DATA.groups[x.g]?.i || ""}</span><span>${x.T}/${MAXP} · <b>${mark(x.T).m}</b></span></div>`).join("");
-    const gs = Object.entries(DATA.groups).map(([k, g]) => { const m = rows.filter(x => x.g === k), avg = m.length ? m.reduce((t, x) => t + x.T, 0) / m.length : 0; return [g, avg]; }), mx = Math.max(1, ...gs.map(x => x[1]));
-    $("#gbars").innerHTML = gs.map(([g, v]) => `<div class="gb"><span>${g.i} ${esc(g.city)}</span><div class="tr"><i style="width:${v / mx * 100}%;background:${g.c}"></i></div><b>${fmt(v)}</b></div>`).join("");
-    const K = [["К1", ["t1"]], ["К2", ["t2"]], ["К3", ["t3", "t4"]], ["К4", ["t5"]]];
-    $("#kbars").innerHTML = K.map(([k, ts]) => { const mxk = ts.reduce((t, x) => t + PTS[x], 0); const done = rows.filter(x => ts.some(t => x.at?.[t])); const p = done.length ? done.reduce((t, x) => t + ts.reduce((a, tt) => a + (tt === "t3" ? (grp[x.g]?.sub?.ok ?? x.sc?.t3 ?? 0) : (x.sc?.[tt] || 0)), 0), 0) / done.length / mxk * 100 : 0;
-      return `<div class="kb"><b>${k}</b><div class="tr"><i style="width:${p}%"></i></div><span>${Math.round(p)}%</span></div>`; }).join("");
-    const all = rows.map(x => mark(x.T)); $("#clsBox").innerHTML = rows.length ? ["Жоғары", "Орта", "Қолдау қажет"].map(l => `<div><b>${all.filter(m => m.lv === l).length}</b><small>${l}</small></div>`).join("") : `<div><small>Сынып нәтижесі Firebase арқылы шығады</small></div>`;
+    const gs = GK.map(k => { const g = DATA.groups[k], m = rows.filter(x => x.g === k), avg = m.length ? m.reduce((t, x) => t + x.T, 0) / m.length : 0; return [g, avg]; }).sort((a, b) => b[1] - a[1]), mx = Math.max(1, ...gs.map(x => x[1]));
+    $("#gbars").innerHTML = gs.map(([g, v], i) => `<div class="gb"><span>${["🥇", "🥈", "🥉"][i]} ${g.i} ${esc(g.city)}</span><div class="tr"><i style="width:${v / mx * 100}%;background:${g.c}"></i></div><b>${fmt(v)}</b></div>`).join("");
+    if (rows.length) {
+      const best = (k, f) => rows.filter(x => (x.sc?.[k] || 0) > 0).sort(f || ((a, b) => (b.sc[k] || 0) - (a.sc[k] || 0) || (a.at?.[k] || 9e15) - (b.at?.[k] || 9e15)))[0];
+      const M = [["🥇", "1-орын", rows[0]], ["🥈", "2-орын", rows[1]], ["🥉", "3-орын", rows[2]], ["🌍", "Глобус шебері", best("globe")], ["⚡", "Квиз жылдамы", best("t6")], ["🖼️", "Үздік постер", best("t3")]].filter(m => m[2]);
+      $("#meds").innerHTML = M.map(([i, t, x], k) => `<div class="med" style="animation-delay:${k * .15}s"><i>${i}</i><div><small>${t}</small><b>${esc(x.name)}</b><span>${DATA.groups[x.g]?.i || ""} ${x.T ?? totOf(x)}/${MAXP} · ${mark(x.T ?? totOf(x)).m} балл</span></div></div>`).join("");
+      $("#allr").innerHTML = `<table><tr><th>#</th><th>Оқушы</th><th>Топ</th><th>Ұпай</th><th>Балл</th></tr>${rows.map((x, i) => { const m = mark(x.T); return `<tr><td>${i + 1}</td><td>${esc(x.name)}</td><td>${DATA.groups[x.g]?.i || ""}</td><td>${x.T}/${MAXP}</td><td><b style="color:${m.c}">${m.m}</b></td></tr>`; }).join("")}</table>`;
+    }
   }
   if (id === "feedback") {
     const list = notes.filter(n => wtab === "all" || (wtab === "s" ? n.role === "Оқушы" : n.role !== "Оқушы"));
     $("#wn").textContent = `${notes.length} пікір`;
-    $("#wall").innerHTML = list.slice(0, 24).map((n, i) => `<div class="note ${n.role === "Оқушы" ? "ns" : "ng"}" style="--r:${(i % 3 - 1) * 1.2}deg"><div class="who">${n.role === "Оқушы" ? "🎓" : n.role === "Мұғалім" ? "👩‍🏫" : n.role === "Әріптес" ? "🤝" : "🎩"} ${esc(n.role)}${n.name ? " · " + esc(n.name) : ""}${n.stars ? ` <span class="stx">${"★".repeat(n.stars)}</span>` : ""}${n.sky != null ? ` ${DATA.selfCheck[n.sky][0]}` : ""}</div>${n.like ? `<p>${esc(n.like)}</p>` : ""}${n.wish ? `<p class="idea">💡 ${esc(n.wish)}</p>` : ""}</div>`).join("") || `<p class="muted">Пікірлер QR арқылы жіберілген сайын осында пайда болады…</p>`;
+    $("#wall").innerHTML = list.slice(0, 24).map((n, i) => `<div class="note ${n.role === "Оқушы" ? "ns" : "ng"}" style="--r:${(i % 3 - 1) * 1.2}deg"><div class="who">${n.role === "Оқушы" ? "🎓" : n.role === "Мұғалім" ? "👩‍🏫" : n.role === "Әріптес" ? "🤝" : "🎩"} ${esc(n.role)}${n.name ? " · " + esc(n.name) : ""}${n.stars ? ` <span class="stx">${"★".repeat(n.stars)}</span>` : ""}${n.sky != null ? ` ${DATA.selfCheck[n.sky][0]}` : ""}</div>${n.use ? `<p>✅ ${esc(n.use)}</p>` : ""}${n.like ? `<p>✨ ${esc(n.like)}</p>` : ""}${n.wish ? `<p class="idea">💡 ${esc(n.wish)}</p>` : ""}</div>`).join("") || `<p class="muted">Пікірлер QR арқылы жіберілген сайын осында пайда болады…</p>`;
     const st = notes.filter(n => n.stars); if (st.length) $("#starAvg").textContent = `⭐ Қонақтардың орташа бағасы: ${fmt(st.reduce((t, n) => t + n.stars, 0) / st.length)} / 5 · ${st.length} баға`;
     const sky = [0, 0, 0, 0]; studs.forEach(x => { if (x.sky != null) sky[x.sky]++; }); $$("#sky button").forEach((b, k) => $("b", b).textContent = sky[k]);
   }
@@ -468,7 +546,7 @@ function KEYOF(k, g) { const LT = { air: "А", water: "С", soil: "Т", eco: "Ж
   if (k === "speak") return "Спикер: «Мен — … ғалыммын», сан + мысал, 1 мин — 2 · Тыңдаушы: №1 кестенің 3–5 жолы — 1, 6 жолы — 2";
   return ""; }
 function secretary() {
-  const ph = $("#phone"), KEYS = TASKS.filter(k => !PHONE.includes(k));
+  const ph = $("#phone"), KEYS = TASKS.filter(k => !PHONE.includes(k) && k !== "globe");
   let ros = store.get("roster", []), g = store.get("secG", null), tab = KEYS[0], msg = "", sc = store.get("secSc", {});
   const extra = () => store.get("secExtra", []);
   const sid = n => "r_" + Array.from(nrm(n)).map(c => c.charCodeAt(0).toString(36)).join("").slice(0, 60);
