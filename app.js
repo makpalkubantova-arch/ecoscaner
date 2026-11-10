@@ -85,14 +85,14 @@ const TASK = {
     let checked = store.get("t1chk", false);
     const draw = () => {
       root.innerHTML = `<div class="t1leg">${C.cats.map(([k, n]) => `<span class="c-${k}">${n}</span>`).join("")}</div><div class="t1l">${order.map(i => { const [t, a] = C.cards[i], v = st[i];
-        return `<div class="t1r ${checked ? (v === a ? "ok" : "no") : v ? "set" : ""}"><span>${esc(t)}</span><div>${C.cats.map(([k, n]) => `<button class="cb c-${k} ${v === k ? "on" : ""} ${checked && a === k ? "right" : ""}" data-i="${i}" data-c="${k}" title="${n}">${n.split(" ")[0]}</button>`).join("")}</div></div>`; }).join("")}</div>
+        return `<div class="t1r ${checked ? (v === a ? "ok" : "no") : v ? "set" : ""}"><span>${esc(t)}</span><div>${C.cats.map(([k, n]) => `<button class="cb c-${k} ${v === k ? "on" : ""} ${checked && a === k ? "right" : ""}" data-i="${i}" data-c="${k}" title="${n}">${n.split(" ")[0]} ${{air:"А",water:"С",soil:"Т",eco:"Ж"}[k]}</button>`).join("")}</div></div>`; }).join("")}</div>
         <div class="trow"><button class="btn" data-a="check">✓ Тексеру</button><span class="score" data-a="score">${checked ? `${C.cards.filter((c, i) => st[i] === c[1]).length}/${C.cards.length} дұрыс · ${scores().t1 ?? 0}/${PTS.t1} ұпай` : `${Object.keys(st).length}/${C.cards.length} таңдалды`}</span></div>`;
     };
     draw();
     root.onclick = e => {
       const b = e.target.closest(".cb"); if (b && !checked) { st[b.dataset.i] = b.dataset.c; store.set("q_t1", st); draw(); return; }
       if (e.target.closest("[data-a=check]") && !checked) { const n = Object.keys(st).length; if (n < C.cards.length) { toast(`Барлық ${C.cards.length} көрсеткішті жікте (қалды: ${C.cards.length - n})`); return; }
-        const ok = C.cards.filter((c, i) => st[i] === c[1]).length; checked = true; store.set("t1chk", true); setScore("t1", Math.round(ok / C.cards.length * PTS.t1), true); draw(); toast(ok === C.cards.length ? "Сканер дәл жіктеді! 🎯" : "Қызыл жолдарды қара: жасыл жиек — дұрыс жауап"); }
+        const ok = C.cards.filter((c, i) => st[i] === c[1]).length; checked = true; store.set("t1chk", true); setScore("t1", ok >= 7 ? 2 : ok >= 4 ? 1 : 0, true); draw(); toast(ok === C.cards.length ? "Сканер дәл жіктеді! 🎯" : "Қызыл жолдарды қара: жасыл жиек — дұрыс жауап"); }
     };
   },
   mcq(root, Q, key, pts, opts = {}) {
@@ -117,7 +117,7 @@ const TASK = {
     const pair = store.get("pair", "");
     root.innerHTML = `<div class="pairbox">👥 Жұбым: <input class="inp" id="pairIn" maxlength="30" placeholder="жұбыңның аты" value="${esc(pair)}"></div><div data-q></div>`;
     $("#pairIn", root).onchange = e => { store.set("pair", e.target.value.trim()); push(); };
-    TASK.mcq($("[data-q]", root), DATA.t2, "t2", true, { perfect: "Жұбыңмен бірге 10/10! 🤝" });
+    TASK.mcq($("[data-q]", root), DATA.t2, "t2", true, { perfect: "Жұбыңмен бірге 6/6! 🤝", onAnswer: (st) => { const ok = r => DATA.t2.filter((q, j) => q.k === r).every((q) => st[DATA.t2.indexOf(q)] === q.a); setScore("t2", (ok("Норматив") ? 1 : 0) + (ok("Қауіп класы") ? 1 : 0), Object.keys(st).length === DATA.t2.length); } });
   },
   t3(root, gFix) {
     const g = gFix || me()?.g || "g1", D = DATA.t3[g], G = DATA.groups[g];
@@ -157,10 +157,10 @@ const TASK = {
     const mix = store.get("t5mix", null) || shuffle(T.order.map((_, i) => i)); store.set("t5mix", mix);
     const draw = () => {
       const done = ord.length === T.order.length, ok = done && ord.every((v, i) => v === i);
-      root.innerHTML = `<h5 class="qk">А. 27-сызба: кезеңдерді ретімен бас</h5><div class="ordr">${mix.map(i => { const pos = ord.indexOf(i); return `<button class="ob ${pos >= 0 ? (done ? (ord[pos] === pos ? "ok" : "no") : "on") : ""}" data-o="${i}">${pos >= 0 ? `<i>${pos + 1}</i>` : ""}${esc(T.order[i])}</button>`; }).join("")}</div>
+      root.innerHTML = `<h5 class="qk">А. 27-сызба: 4 кезеңді ретімен бас (1 → 4)</h5><div class="ordr">${mix.map(i => { const pos = ord.indexOf(i); return `<button class="ob ${pos >= 0 ? (done ? (ord[pos] === pos ? "ok" : "no") : "on") : ""}" data-o="${i}">${pos >= 0 ? `<i>${pos + 1}</i>` : ""}${esc(T.order[i])}</button>`; }).join("")}</div>
         ${done ? `<div class="exp">${ok ? "✓ Реті дұрыс!" : "✗ Дұрыс реті: " + T.order.join(" → ")}</div>` : `<button class="btn lt" data-a="clr" style="margin-top:8px">Тазалау</button>`}
         <div data-q></div>`;
-      const calc = (st) => { const m = T.match.filter((q, i) => st[i] === q.a).length; const sc = (ok ? 1 : 0) + m / T.match.length * 4; setScore("t5", Math.round(sc), done && Object.keys(st).length === T.match.length); };
+      const calc = (st) => { const m = T.match.filter((q, i) => st[i] === q.a).length; setScore("t5", (ok ? 1 : 0) + (m === T.match.length ? 1 : 0), done && Object.keys(st).length === T.match.length); };
       TASK.mcq($("[data-q]", root), T.match, "t5", false, { noReset: true, onAnswer: st => calc(st) });
       root.onclick = e => { if (e.target.closest("[data-q]")) return;
         const b = e.target.closest("[data-o]"); if (b && !done) { const i = +b.dataset.o; if (!ord.includes(i)) { ord.push(i); store.set("t5o", ord); if (ord.length === T.order.length) calc(store.get("q_t5", {})); draw(); } }
@@ -216,7 +216,7 @@ if (MODE !== "b") {
       return;
     }
     const s = ST.find(x => x.id === id);
-    ph.innerHTML = `${top()}<div class="ph-h"><small>${esc(s.kicker)}</small><h2>${esc(s.title)}</h2>${s.val ? `<span class="seal">Адал азамат · ${esc(s.val)}</span>` : ""}</div><div class="howp">${DATA.how[id].map((h, i) => `<span><i>${i + 1}</i>${esc(h)}</span>`).join("")}</div><div class="card task-ph" id="tk"></div><button class="btn lt" id="bk">← Тапсырмалар</button>`;
+    ph.innerHTML = `${top()}<div class="ph-h"><small>${esc(s.kicker)}</small><h2>${esc(s.title)}</h2></div><div class="howp">${DATA.how[id].map((h, i) => `<span><i>${i + 1}</i>${esc(h)}</span>`).join("")}</div><div class="card task-ph" id="tk"></div><button class="btn lt" id="bk">← Тапсырмалар</button>`;
     TASK[id]($("#tk")); $("#bk").onclick = hub;
   }
   if (MODE === "g") guest(); else if (!me()) join(); else hub();
@@ -295,12 +295,14 @@ $$("[data-close]").forEach(b => b.onclick = () => b.closest(".modal").hidden = t
 $("#qrBtn").onclick = () => { const s = ST[cur], g = s.id === "feedback" || s.id === "invite"; const u = link(g ? "g" : "s", TASKS.includes(s.id) ? s.id : ""); $("#qrT").textContent = g ? "Қонақтар мен мұғалімдерге: кері байланыс" : "Оқушыларға: экосканерге қосылу"; $("#qrBig").innerHTML = qrSvg(u); $("#qrUrl").textContent = u; $("#qrModal").hidden = false; };
 
 /* ---------- кезеңдер ---------- */
-const HD = (s, p, tag) => `<div class="hd"><span class="k">${esc(s.kicker)}${s.min ? " · " + s.min + " мин" : ""}</span>${s.val ? `<span class="seal">Адал азамат · ${esc(s.val)}</span>` : ""}<h2>${esc(s.title)}</h2>${p ? `<p>${p}</p>` : ""}${tag ? `<div class="tag">${tag}</div>` : ""}</div>`;
+/* Кезеңнің басы: көк жолақ (мұғалім дауыстап оқиды) → ұсақ: әдіс · түрі · балл · оқулық → іс-әрекет → үлкен мазмұн */
+const HD = (s, p, tag) => `<div class="hd hd2"><h2><span class="ph2">${esc(DATA.parts[s.part] || s.kicker)}:</span> ${esc(s.title)}</h2><div class="meta">${s.method ? `<span>🧭 Әдіс: <b>${esc(s.method)}</b></span>` : ""}${s.type ? `<span>👥 Түрі: <b>${esc(s.type)}</b></span>` : ""}${PTS[s.id] ? `<span>📒 ${esc(s.crit || "")} ${PTS[s.id]} ұпай</span>` : ""}${s.book ? `<span>📖 ${esc(s.book)}</span>` : ""}${s.min ? `<span>⏱ ${s.min} мин</span>` : ""}</div>${p ? `<p>${p}</p>` : ""}</div>`;
 const modeBadge = s => `<span class="mode m-${s.mode === "Жеке" ? "i" : s.mode === "Жұппен" ? "p" : "g"}">${s.mode === "Жеке" ? "👤" : s.mode === "Жұппен" ? "👥" : "👨‍👩‍👧"} ${s.mode}</span> <span class="mode m-c">${s.crit} · ${PTS[s.id]} ұпай</span>`;
 /* «Сен не істейсің?» — оқушыға әр кезеңде 1-2-3 қадам (scenariy-data.js) */
 const stuBar = id => { const c = (window.SCEN && SCEN.stages[id]) || null; if (!c || id === "invite") return "";
   return `<div class="stu"><div class="stu-l"><b>🧑‍🎓 Сен не істейсің?</b><span>${c.tools.map(t => `<em class="${t}">${esc(SCEN.tools[t])}</em>`).join("")}</span></div><div class="stu-s">${c.stu.map((h, i) => `<div style="animation-delay:${i * .12}s"><i>${i + 1}</i>${esc(h)}</div>`).join(`<span>→</span>`)}</div>${c.tip ? `<div class="stu-t">💡 ${esc(c.tip)}</div>` : ""}</div>`; };
 const howStrip = id => stuBar(id);
+const SCIN = ["Вернадский", "Эрисман", "Парацельс", "Килинг", "Карсон", "Израэль"];
 const descPanel = id => `<aside class="side"><div class="card"><div class="lbl">📒 Дескриптор · ${PTS[id]} балл</div><div class="dsc">${DATA.desc[id].map(([d, p]) => `<div><span>${esc(d)}</span><b>${p}</b></div>`).join("")}</div><p class="muted sm" style="margin-top:10px">Тапсырма тақтада және жұмыс парағында орындалады. Балды топ <b>хатшысы</b> телефонға енгізеді — нәтиже «Қорытынды баға» бетінде.</p></div></aside>`;
 const resPanel = id => `<aside class="side"><div class="card res-c"><div class="res-h"><div class="qrmini">${qrSvg(link("s", id))}</div><div><div class="lbl">Нәтижелер · тірі</div><div class="res-n" id="resN">—</div></div></div><div class="res-list" id="resList"><p class="muted sm">Оқушылар орындаған сайын осында шығады</p></div></div></aside>`;
 let lt = 0;
@@ -325,18 +327,18 @@ const R = {
     return `<div class="card gcard" style="--gc:${G.c}"><h3>${G.i} ${esc(G.n)}</h3>${m.length ? `<ol>${m.map(r => `<li>${esc(r.name)}${r.role ? ` <b>${ROLE[r.role]}</b>` : ""}</li>`).join("")}</ol>` : `<p class="muted">⚙ → «Топтарды теңдестіру» батырмасымен тізім енгізіңіз.</p>`}</div>`; }).join("")}<div class="card fcol c"><div class="lbl">📒 Хатшы телефоны</div><div class="qrbox">${qrSvg(link("h"))}</div><p class="muted sm">Әр топтың хатшысы сканерлеп, тобын таңдайды да, жұмыс парағына қарап балл қояды.</p></div></div></div>`; },
   speak: s => { const ros = store.get("roster", []); const nm = (g, r) => (ros.find(x => x.g === g && x.role === r) || {}).name || (r === "sp1" ? "1-спикер" : "2-спикер");
     const SP = DATA.learnTabs.map((t, i) => ({ i, g: GK[Math.floor(i / 2)], r: i % 2 ? "sp2" : "sp1" }));
-    return `<div class="st">${HD(s, "Әр топтың 2 спикері алдын ала дайындалған инфографикамен бір бөлімді 1 минутта түсіндіреді. Қалғандары жұмыс парағындағы жіктеу кестесін толтырады.", "ЖАҢА САБАҚ")}<div class="body learn"><div class="lnav" id="lnav">${SP.map(x => { const G = DATA.groups[x.g]; return `<button data-sp="${x.i}" style="border-bottom:5px solid ${G.c}">${esc(DATA.learnTabs[x.i].t)}<small style="display:block;font-weight:700">🎤 ${esc(nm(x.g, x.r))} · ${G.i}</small></button>`; }).join("")}<span class="sptim" id="sptim"></span></div><div id="lbox"></div></div></div>`; },
+    return `<div class="st">${HD(s, "Спикер ғалымның рөліне кіреді: «Мен — …мын. Бүгін мен … түсіндіремін». Экрандағы инфографикаға сүйеніп, қарапайым тілмен 1 минут сөйлейді. Қалғандары №1 кестені толтырады.", "ЖАҢА САБАҚ")}<div class="body learn"><div class="lnav" id="lnav">${SP.map(x => { const G = DATA.groups[x.g]; return `<button data-sp="${x.i}" style="border-bottom:5px solid ${G.c}">${esc(DATA.learnTabs[x.i].t)}<small style="display:block;font-weight:700">🎭 ${esc(nm(x.g, x.r))} — ${esc(SCIN[x.i])} · ${G.i}</small></button>`; }).join("")}<span class="sptim" id="sptim"></span></div><div id="lbox"></div></div></div>`; },
   video: s => `<div class="st">${HD(s, "1 минут 55 секунд: оқулықтағы 4 сызба + Қазгидрометтің 2026 жылғы нақты деректері")}<div class="body vid"><div class="card" style="padding:10px"><video controls preload="metadata" poster="media/poster.jpg" playsinline><source src="media/ekoskaner.mp4" type="video/mp4"></video></div></div></div>`,
   learn: s => `<div class="st">${HD(s, "Оқулықтағы 25–28-сызбалар · әр қадамда нақты мысал және жедел сұрақ", "ЖАҢА САБАҚ")}<div class="body learn"><div class="lnav" id="lnav">${DATA.learnTabs.map((t, i) => `<button data-l="${i}">${esc(t.t)}</button>`).join("")}</div><div id="lbox" class="lbox"></div></div></div>`,
-  t1: s => `<div class="st">${HD(s, "Қазгидромет 2026 бюллетенінен алынған 12 нақты көрсеткішті 25-сызба бойынша 4 ортаға жікте.", modeBadge(s))}<div class="body task">${howStrip("t1")}<div class="card tk" id="tk"></div>${descPanel("t1")}</div></div>`,
-  t2: s => `<div class="st">${HD(s, "26-сызба (нормативтер) және ҚР ДСМ-70 нормативтері (қауіптілік кластары). Жұбыңмен талқылап, №3 жұмыс парағында жауап бер.", modeBadge(s))}<div class="body task">${howStrip("t2")}<div class="card tk" id="tk"></div>${descPanel("t2")}</div></div>`,
-  t3: s => `<div class="st">${HD(s, "Әр топ — бір қаланың «экологиялық анализі». Деңгейді анықта, басты ластаушыны тап, ұсыныс жаз — 1 минут қорға.", modeBadge(s))}<div class="body t3b">${howStrip("t3")}<div class="dos3">${Object.keys(DATA.groups).map(g => { const D = DATA.t3[g], G = DATA.groups[g];
+  t1: s => `<div class="st">${HD(s, "8 көрсеткішті 4 ортаға жікте: А — ауа, С — су, Т — топырақ, Ж — табиғи жүйелер. <b>Үлгі:</b> «PM2.5 · Қарағанды» → <b>А</b>.", modeBadge(s))}<div class="body task">${howStrip("t1")}<div class="card tk" id="tk"></div>${descPanel("t1")}</div></div>`,
+  t2: s => `<div class="st">${HD(s, "Жұбыңмен №3 парақта: 3 нормативтің түрін және 3 заттың қауіп класын белгіле. <b>Үлгі:</b> «Озон» → <b>I класс</b> (өте қауіпті).", modeBadge(s))}<div class="body task">${howStrip("t2")}<div class="card tk" id="tk"></div>${descPanel("t2")}</div></div>`,
+  t3: s => `<div class="st">${HD(s, "Топ өз қаласының досьесін оқиды → ватманға жазады: <b>«Біздің қала — … деңгей, себебі СИ = …; басты ластаушы — …; ұсынысымыз — …»</b> → 1 минут қорғайды.", modeBadge(s))}<div class="body t3b">${howStrip("t3")}<div class="dos3">${Object.keys(DATA.groups).map(g => { const D = DATA.t3[g], G = DATA.groups[g];
       return `<div class="dos" style="--gc:${G.c}"><div class="dos-h">${G.i} <b>${esc(G.n)}</b><span>${esc(D.period)}</span></div><div class="dos-g">${gauge(D.si, D.ez)}<div class="dos-k"><div><small>СИ</small><b>${fmt(D.si)}</b></div><div><small>ЕЖҚ</small><b>${fmt(D.ez)}%</b></div></div></div>${hbars(D.air.slice(0, 4), Math.max(...D.air.map(a => a[1])) * 1.1)}<ul class="dos-f">${D.facts.slice(0, 2).map(f => `<li>${esc(f)}</li>`).join("")}</ul>
       <div class="dos-r" id="gr-${g}"><p class="muted sm">Топтың жауабы күтілуде… 📡</p></div><div class="bon">Қорғау: <button data-bonus="${g}" data-v="1">+1</button><button data-bonus="${g}" data-v="2">+2</button><b id="bo-${g}"></b></div></div>`; }).join("")}</div>
       </div></div>`,
-  t4: s => `<div class="st">${HD(s, "Оқулық, 93–94-б.: C₁/ШШК₁ + C₂/ШШК₂ < 1 болуы тиіс. ЖИ жауабын да, оқулықты да тексер — шешім сенікі!", modeBadge(s))}<div class="body task">${howStrip("t4")}<div class="card tk" id="tk"></div>${descPanel("t4")}</div></div>`,
-  t5: s => `<div class="st">${HD(s, "27–28-сызбалар: мониторинг кезеңдері, әдістері, деңгейлері + «Адал азамат»: ластануды көрсең, не істейсің?", modeBadge(s))}<div class="body task">${howStrip("t5")}<div class="card tk" id="tk"></div>${descPanel("t5")}</div></div>`,
-  t6: s => `<div class="st">${HD(s, "6 сұрақ — 3 минут. Телефоннан жауап бер, жүйе бірден тексереді.", modeBadge(s))}<div class="body task">${howStrip("t6")}<div class="card tk" id="tk"></div>${resPanel("t6")}</div></div>`,
+  t4: s => `<div class="st">${HD(s, "Оқулық пен ЖИ: «0,996 &lt; 1 — нормада». Тексер: 0,345 : 0,35 = <b>0,986</b> (берілген) → 0,009 : 0,01 = ? → қосынды = ? → нормада ма?", modeBadge(s))}<div class="body task">${howStrip("t4")}<div class="card tk" id="tk"></div>${descPanel("t4")}</div></div>`,
+  t5: s => `<div class="st">${HD(s, "А. 27-сызба: мониторингтің 4 кезеңін ретімен нөмірле. Б. Жағдаят: ластануды көрсең, заңды әрекетті таңда.", modeBadge(s))}<div class="body task">${howStrip("t5")}<div class="card tk" id="tk"></div>${descPanel("t5")}</div></div>`,
+  t6: s => `<div class="st">${HD(s, "Телефонды ал → QR → атың → 6 сұрақ. Жүйе бірден тексереді.", modeBadge(s))}<div class="body task">${howStrip("t6")}<div class="card tk" id="tk"></div>${resPanel("t6")}</div></div>`,
   sum: s => `<div class="st">${HD(s, "Сканерлеу аяқталды: не үйрендік, кім үздік, қай критерийді меңгердік?", "ҚОРЫТЫНДЫ")}<div class="body sumb">
     <div class="card"><h3>🏆 Үздік сарапшылар</h3><div class="lead" id="lead"><p class="muted">Нәтижелер Firebase арқылы тірі шығады.</p></div><h3 style="margin-top:14px">Топтар</h3><div class="gbars" id="gbars"></div></div>
     <div class="card"><h3>📊 Критерийлерді меңгеру (сынып)</h3><div class="kbars" id="kbars"></div><div class="live" id="clsBox" style="margin-top:14px"></div></div>
@@ -455,6 +457,16 @@ if (cur < 0) cur = 0;
 go(cur);
 
 /* ================= 📒 ХАТШЫ (?m=h): бір топқа бір телефон ================= */
+/* хатшыға жауап кілті: парақты тез тексеру үшін */
+function KEYOF(k, g) { const LT = { air: "А", water: "С", soil: "Т", eco: "Ж" };
+  if (k === "t1") return DATA.t1.cards.map((c, i) => `${i + 1}–${LT[c[1]]}`).join(", ") + " · 7–8 дұрыс = 2, 4–6 = 1";
+  if (k === "t2") return DATA.t2.map((q, i) => `${i + 1}) ${q.o[q.a]}`).join(" · ") + " · 1–3 дұрыс = 1, 4–6 дұрыс = 1";
+  if (k === "t3") { const D = DATA.t3[g || "g1"]; return `${D.city}: ` + DATA.t3.qs.map((q, i) => `${i + 1}) ${q.o[D.a[i]]}`).join(" · ") + ` · СИ ${fmt(D.si)}, ЕЖҚ ${fmt(D.ez)}%`; }
+  if (k === "t4") return "0,009 : 0,01 = 0,9 → 0,986 + 0,9 = 1,886 > 1 → нормадан АСАДЫ (оқулықтағы 0,996 — қате)";
+  if (k === "t5") return DATA.t5.order.map((o, i) => `${i + 1}. ${o}`).join(" → ") + " · Жағдаят: «" + DATA.t5.match.map(q => q.o[q.a]).join("; ") + "»";
+  if (k === "hw") return "Сұраққа дәлел (мысал, сан) келтіріп жауап берсе — 1";
+  if (k === "speak") return "Спикер: «Мен — … ғалыммын», сан + мысал, 1 мин — 2 · Тыңдаушы: №1 кестенің 3–5 жолы — 1, 6 жолы — 2";
+  return ""; }
 function secretary() {
   const ph = $("#phone"), KEYS = TASKS.filter(k => !PHONE.includes(k));
   let ros = store.get("roster", []), g = store.get("secG", null), tab = KEYS[0], msg = "", sc = store.get("secSc", {});
@@ -466,10 +478,10 @@ function secretary() {
     LIVE.putStudent(sid(name), rec).then(() => { msg = "✅ " + name + " — тақтаға жіберілді"; draw(); }).catch(() => { msg = "⚠️ Жіберілмеді, интернетті тексер"; draw(); }); };
   function draw() {
     const st = ST.find(x => x.id === tab), D = DATA.desc[tab], mx = PTS[tab];
-    let h = `<div class="ph-top"><span class="case-no sm">ЭКО<br>СКАН</span><span class="me">📒 Хатшы</span></div><div class="ph-h"><small>Жұмыс парағына қарап балл қой</small><h2>${g ? DATA.groups[g].i + " " + esc(DATA.groups[g].n) : "Тобыңды таңда"}</h2></div>
+    let h = `<div class="ph-top"><span class="case-no sm">ЭКО<br>СКАН</span><span class="me">📒 Хатшы</span></div><div class="ph-h"><small>Парақты кілтпен тексер → балл бас</small><h2>${g ? DATA.groups[g].i + " " + esc(DATA.groups[g].n) : "Тобыңды таңда"}</h2></div>
       <div class="gpick sec-g">${GK.map(k => `<button data-g="${k}" class="${g === k ? "on" : ""}">${DATA.groups[k].i} ${esc(DATA.groups[k].city)}</button>`).join("")}</div>`;
     if (g) { h += `<div class="sec-tabs">${KEYS.map(k => `<button data-k="${k}" class="${k === tab ? "on" : ""}">${esc((ST.find(x => x.id === k).title.split(" · ")[1] || ST.find(x => x.id === k).title).replace(/[«»]/g, ""))} · ${PTS[k]}</button>`).join("")}</div>
-      <div class="card sm" style="margin-top:8px"><b>${esc(st.title)}</b> · ${mx} балл<br>${D.map(([d, p]) => `• ${esc(d)} — ${p}`).join("<br>")}</div>`;
+      <div class="card sm" style="margin-top:8px"><b>${esc(st.title)}</b> · ${mx} балл<br>${D.map(([d, p]) => `• ${esc(d)} — ${p}`).join("<br>")}</div><div class="card sm keyc">🔑 <b>Жауап кілті:</b> ${esc(KEYOF(tab, g))}</div>`;
       const M = mem(); if (st.mode === "Топпен" && M.length) h += `<div class="sec-all">Бүкіл топқа: ${Array.from({ length: mx + 1 }, (_, v) => `<button data-all="${v}">${v}</button>`).join("")}</div>`;
       if (!M.length) h += `<div class="card sm">Тізім жоқ: мұғалім ⚙ → «Топтарды теңдестіру» бетін толтырсын, немесе төменнен оқушыны қос.</div>`;
       M.forEach((p, i) => { const v = sc[nrm(p.name)] || {}, tot = KEYS.reduce((t, k) => t + (v[k] || 0), 0);

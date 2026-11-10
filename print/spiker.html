@@ -15,7 +15,7 @@ body{font-family:'Golos Text',sans-serif;color:#13233a;background:#d9e3ee;-webki
 
 .front .num{position:absolute;left:8mm;top:8mm;width:24mm;height:24mm;border-radius:50%;background:#fff;color:var(--c2);display:grid;place-items:center;font-size:40pt;font-weight:800;z-index:2;box-shadow:0 2mm 6mm rgba(0,0,0,.25)}
 .front .bd{padding:10mm 11mm 9mm 4mm;display:flex;flex-direction:column;gap:4mm}
-.front .k{font-size:10pt;font-weight:800;letter-spacing:.14em;opacity:.85}
+.front .role{display:inline-block;align-self:flex-start;background:#FFE38A;color:#3b2a00;font-weight:800;font-size:14pt;border-radius:9mm;padding:1.2mm 5mm}.front .k{font-size:10pt;font-weight:800;letter-spacing:.14em;opacity:.85}
 .front h1{font-size:30pt;line-height:1.05;font-weight:800}
 .front .big{display:flex;align-items:baseline;gap:4mm;background:rgba(255,255,255,.14);border-radius:5mm;padding:3mm 5mm}
 .front .big b{font-size:44pt;font-weight:800;color:#FFE38A;line-height:1;white-space:nowrap}
@@ -51,16 +51,16 @@ SP.forEach((sp, k) => {
   const G = DATA.groups[sp.g], c2 = DARK[sp.g], soft = SOFT[sp.g], tab = TB[sp.tab], title = tab.t.replace(/^\d+ · /, "");
   const role = `${G.n} · ${sp.n}`;
   h += `<section class="page front" style="--c2:${c2};--soft:${soft}">
-    <div class="ph">${I[sp.ico]("#fff")}<div class="num">${k + 1}</div><div class="sci"><b>🎓 Ғалым-кеңесші: ${sp.sci}</b>${sp.sciT}</div></div>
-    <div class="bd"><div class="k">6 СПИКЕР · ${k + 1}-БӨЛІМ · ${role.toUpperCase()}</div><h1>${title}</h1>
+    <div class="ph">${I[sp.ico]("#fff")}<div class="num">${k + 1}</div><div class="sci"><b>🎭 Сенің рөлің: ${sp.sci}</b>${sp.sciT}</div></div>
+    <div class="bd"><div class="k">6 СПИКЕР · ${k + 1}-БӨЛІМ · ${role.toUpperCase()}</div><div class="role">🎭 Мен — ${sp.sci.split(" (")[0]}</div><h1>${title}</h1>
       <div class="big"><b>${sp.big}</b><span>${sp.bigT}</span></div>
       <div class="steps">${sp.kw.map((w, i) => `<div class="st"><i>${i + 1}</i><div><b>${w}</b></div></div>`).join("")}</div></div>
   </section>`;
   h += `<section class="page back" style="--c2:${c2};--soft:${soft}">
-    <div class="hd"><div class="n">${k + 1}</div><div><h2>${title}</h2><p>Тақта: 8-кезең «6 спикер» → ${k + 1}-бөлім · таймер 60 с · ${tab.src}</p></div><div class="who">${role}<br>Аты-жөні: ____________________</div></div>
+    <div class="hd"><div class="n">${k + 1}</div><div><h2>${title}</h2><p>Сен — ${sp.sci} рөліндесің · тақта: 8-кезең → ${k + 1}-бөлім · 60 с · ${tab.src}</p></div><div class="who">${role}<br>Аты-жөні: ____________________</div></div>
     <div class="sp">${sp.s.map((p, i) => `<p><em>${TIME[i]}</em>${p}</p>`).join("")}</div>
     <div class="side">
-      <div class="box"><h3>Карточканы қалай ұстаймын</h3><ol class="tips"><li>Алдыңғы бетті сыныпқа қаратып, кеуде тұсында ұста.</li><li>Мына бетке қарап сөйле, бірақ сыныпқа жиі қара.</li><li>Сандарды анық, баяу айт.</li></ol></div>
+      <div class="box"><h3>🎭 Рөлге кір</h3><ol class="tips"><li>Сен — <b>${sp.sci.split(" (")[0]}</b>. «Мен…» деп ғалымның атынан сөйле.</li><li>Экранға қарап оқыма — сөзді алдын ала оқып, өз сөзіңмен айт.</li><li>Алдыңғы бетті сыныпқа көрсетіп ұста, сандарды анық айт.</li></ol></div>
       <div class="box"><h3>Тақтада не болады</h3>Мұғалім ${k + 1}-бөлім батырмасын басады: экранда сенің бөлімің ашылады, «Қазір түсіндіріп жатыр» тақтасы мен 60 секундтық таймер шығады.</div>
       <div class="box"><h3>Тыңдаушылар</h3>№1 жіктеу кестесіне жазады: негізгі ұғым · мысал, сан · ғалым.</div>
       <div class="box"><h3>Бағалау</h3>Хатшы «Өзін-өзі басқару» бойынша балл қояды (2 ұпай).</div>
