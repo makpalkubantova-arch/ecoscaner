@@ -297,7 +297,10 @@ $("#qrBtn").onclick = () => { const s = ST[cur], g = s.id === "feedback" || s.id
 /* ---------- кезеңдер ---------- */
 const HD = (s, p, tag) => `<div class="hd"><span class="k">${esc(s.kicker)}${s.min ? " · " + s.min + " мин" : ""}</span>${s.val ? `<span class="seal">Адал азамат · ${esc(s.val)}</span>` : ""}<h2>${esc(s.title)}</h2>${p ? `<p>${p}</p>` : ""}${tag ? `<div class="tag">${tag}</div>` : ""}</div>`;
 const modeBadge = s => `<span class="mode m-${s.mode === "Жеке" ? "i" : s.mode === "Жұппен" ? "p" : "g"}">${s.mode === "Жеке" ? "👤" : s.mode === "Жұппен" ? "👥" : "👨‍👩‍👧"} ${s.mode}</span> <span class="mode m-c">${s.crit} · ${PTS[s.id]} ұпай</span>`;
-const howStrip = id => `<div class="how">${DATA.how[id].map((h, i) => `<div style="animation-delay:${i * .15}s"><i>${i + 1}</i>${esc(h)}</div>`).join(`<span>→</span>`)}</div>`;
+/* «Сен не істейсің?» — оқушыға әр кезеңде 1-2-3 қадам (scenariy-data.js) */
+const stuBar = id => { const c = (window.SCEN && SCEN.stages[id]) || null; if (!c || id === "invite") return "";
+  return `<div class="stu"><div class="stu-l"><b>🧑‍🎓 Сен не істейсің?</b><span>${c.tools.map(t => `<em class="${t}">${esc(SCEN.tools[t])}</em>`).join("")}</span></div><div class="stu-s">${c.stu.map((h, i) => `<div style="animation-delay:${i * .12}s"><i>${i + 1}</i>${esc(h)}</div>`).join(`<span>→</span>`)}</div>${c.tip ? `<div class="stu-t">💡 ${esc(c.tip)}</div>` : ""}</div>`; };
+const howStrip = id => stuBar(id);
 const descPanel = id => `<aside class="side"><div class="card"><div class="lbl">📒 Дескриптор · ${PTS[id]} балл</div><div class="dsc">${DATA.desc[id].map(([d, p]) => `<div><span>${esc(d)}</span><b>${p}</b></div>`).join("")}</div><p class="muted sm" style="margin-top:10px">Тапсырма тақтада және жұмыс парағында орындалады. Балды топ <b>хатшысы</b> телефонға енгізеді — нәтиже «Қорытынды баға» бетінде.</p></div></aside>`;
 const resPanel = id => `<aside class="side"><div class="card res-c"><div class="res-h"><div class="qrmini">${qrSvg(link("s", id))}</div><div><div class="lbl">Нәтижелер · тірі</div><div class="res-n" id="resN">—</div></div></div><div class="res-list" id="resList"><p class="muted sm">Оқушылар орындаған сайын осында шығады</p></div></div></aside>`;
 let lt = 0;
@@ -326,7 +329,7 @@ const R = {
   video: s => `<div class="st">${HD(s, "1 минут 55 секунд: оқулықтағы 4 сызба + Қазгидрометтің 2026 жылғы нақты деректері")}<div class="body vid"><div class="card" style="padding:10px"><video controls preload="metadata" poster="media/poster.jpg" playsinline><source src="media/ekoskaner.mp4" type="video/mp4"></video></div></div></div>`,
   learn: s => `<div class="st">${HD(s, "Оқулықтағы 25–28-сызбалар · әр қадамда нақты мысал және жедел сұрақ", "ЖАҢА САБАҚ")}<div class="body learn"><div class="lnav" id="lnav">${DATA.learnTabs.map((t, i) => `<button data-l="${i}">${esc(t.t)}</button>`).join("")}</div><div id="lbox" class="lbox"></div></div></div>`,
   t1: s => `<div class="st">${HD(s, "Қазгидромет 2026 бюллетенінен алынған 12 нақты көрсеткішті 25-сызба бойынша 4 ортаға жікте.", modeBadge(s))}<div class="body task">${howStrip("t1")}<div class="card tk" id="tk"></div>${descPanel("t1")}</div></div>`,
-  t2: s => `<div class="st">${HD(s, "26-сызба (нормативтер) және ҚР ДСМ-70 нормативтері (қауіптілік кластары). Жұбыңмен талқылап, бір телефоннан жауап бер.", modeBadge(s))}<div class="body task">${howStrip("t2")}<div class="card tk" id="tk"></div>${descPanel("t2")}</div></div>`,
+  t2: s => `<div class="st">${HD(s, "26-сызба (нормативтер) және ҚР ДСМ-70 нормативтері (қауіптілік кластары). Жұбыңмен талқылап, №3 жұмыс парағында жауап бер.", modeBadge(s))}<div class="body task">${howStrip("t2")}<div class="card tk" id="tk"></div>${descPanel("t2")}</div></div>`,
   t3: s => `<div class="st">${HD(s, "Әр топ — бір қаланың «экологиялық анализі». Деңгейді анықта, басты ластаушыны тап, ұсыныс жаз — 1 минут қорға.", modeBadge(s))}<div class="body t3b">${howStrip("t3")}<div class="dos3">${Object.keys(DATA.groups).map(g => { const D = DATA.t3[g], G = DATA.groups[g];
       return `<div class="dos" style="--gc:${G.c}"><div class="dos-h">${G.i} <b>${esc(G.n)}</b><span>${esc(D.period)}</span></div><div class="dos-g">${gauge(D.si, D.ez)}<div class="dos-k"><div><small>СИ</small><b>${fmt(D.si)}</b></div><div><small>ЕЖҚ</small><b>${fmt(D.ez)}%</b></div></div></div>${hbars(D.air.slice(0, 4), Math.max(...D.air.map(a => a[1])) * 1.1)}<ul class="dos-f">${D.facts.slice(0, 2).map(f => `<li>${esc(f)}</li>`).join("")}</ul>
       <div class="dos-r" id="gr-${g}"><p class="muted sm">Топтың жауабы күтілуде… 📡</p></div><div class="bon">Қорғау: <button data-bonus="${g}" data-v="1">+1</button><button data-bonus="${g}" data-v="2">+2</button><b id="bo-${g}"></b></div></div>`; }).join("")}</div>
@@ -367,6 +370,7 @@ function learn(i) {
 
 function render() {
   const s = ST[cur]; document.body.dataset.part = s.part; $("#main").innerHTML = R[s.id](s); seen.clear();
+  if (!$("#main .stu") && s.id !== "invite") { const hd = $("#main .hd"), sb = stuBar(s.id); if (sb) { if (hd) hd.insertAdjacentHTML("afterend", sb); else $("#main").insertAdjacentHTML("afterbegin", sb); } }
   if (s.id === "invite") $("#startBtn").onclick = () => clkStart ? go(1, true) : startLesson();
   if (s.id === "speak") { $("#lnav").onclick = e => { const b = e.target.closest("[data-sp]"); if (!b) return; const i = +b.dataset.sp; learn(i); spkTimer(60, b.querySelector("small").textContent); }; learn(0); }
   if (s.id === "learn") { learn(lt); $("#lnav").onclick = e => { const b = e.target.closest("[data-l]"); if (b) learn(+b.dataset.l); }; }

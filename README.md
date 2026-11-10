@@ -22,3 +22,8 @@
 | 3 | Жұмыс парақтары №1–№8 + жауап кілті | `materialdar/3-Zhumys-paraqtary.docx / .pdf` |
 | 4 | Наклейкалар (рөлдер, тақтайшалар, «Менің аспаным», медальдар) | `materialdar/4-Naklejkalar.pdf`, `print/naklejka.html` |
 | 5 | Постерге дайындық инфографикасы (3-тапсырма, әр топқа A4) | `materialdar/5-Poster-infografikalar.pdf`, `print/poster.html` |
+| 6 | 👩‍🏫 Сабақты өткізу сценарийі (не айтамын, не басамын) | `materialdar/6-Sabaq-scenariyi.pdf`, `print/scenariy.html` |
+| 7 | 🎤 6 спикердің карточкасы (алды — инфографика, арты — 1 мин сөз) | `materialdar/7-Spiker-kartochkalary.pdf`, `print/spiker.html`, мәтіні `print/spiker-data.js` |
+| 8 | 🧑‍🎓 Оқушы жадынамасы | `materialdar/8-Oqushy-zhadynamasy.pdf`, `print/zhadynama.html` |
+
+Тақтада әр кезеңде **«🧑‍🎓 Сен не істейсің? 1 → 2 → 3»** жолағы шығады (`scenariy-data.js`).
