@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Экосканер · Қоршаған ортаның сапасы · бейне</title>
+<link href="vendor/geo-fonts.css" rel="stylesheet">
+<style>
+:root{--or:#F97316;--or2:#FDBA74;--tl:#14B8A6;--sky:#0EA5E9;--display:'Montserrat','Arial Black',Arial,sans-serif;--body:'Nunito','Segoe UI',Arial,sans-serif}
+html,body{margin:0;height:100%;background:#020814;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;font-family:var(--body);color:#fff;background:radial-gradient(1200px 800px at 70% 50%,#0B2340 0%,#030A18 60%,#01040B 100%)}
+#g{position:absolute;inset:0}
+.vig{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(1,6,16,.85) 0%,rgba(1,6,16,.4) 36%,rgba(1,6,16,0) 54%),linear-gradient(0deg,rgba(1,6,16,.75) 0%,rgba(1,6,16,0) 22%)}
+.top{position:absolute;left:64px;right:64px;top:40px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:14px;font:800 19px var(--display);letter-spacing:3px;color:#7DD3FC;text-transform:uppercase;white-space:nowrap}
+.brand i{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,#0EA5E9,#14B8A6);color:#fff;font:900 13px/1.05 var(--display);letter-spacing:1px;text-align:center}
+.chips{display:flex;gap:9px;margin-left:auto}
+.chip{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);font:800 22px var(--display);color:rgba(255,255,255,.5)}
+.chip.on{background:linear-gradient(180deg,#FDBA74,#F97316);color:#fff;border-color:transparent;box-shadow:0 10px 24px -8px rgba(249,115,22,.8)}
+.chip.done{color:#fff;background:rgba(20,184,166,.5);border-color:rgba(94,234,212,.5)}
+.panel{position:absolute;left:64px;top:140px;width:760px;padding:30px 36px 28px;border-radius:30px;background:linear-gradient(180deg,rgba(14,32,52,.9),rgba(8,20,36,.84));border:1px solid rgba(255,255,255,.16);box-shadow:0 30px 60px -20px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.18)}
+.eb{font:800 17px var(--display);letter-spacing:2.6px;text-transform:uppercase}
+.nm{font:800 40px/1.1 var(--display);margin:8px 0 18px;text-wrap:balance}
+.src{margin-top:16px;font:700 16px var(--body);color:rgba(255,255,255,.5)}
+.row{display:flex;align-items:center;gap:14px;border-radius:18px;padding:13px 16px;margin-top:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);font:700 21px/1.3 var(--body)}
+.row b{font-family:var(--display)}
+.row .ic{flex:none;width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px}
+.row small{display:block;font-size:17px;opacity:.75;font-weight:700}
+.big{font:900 64px/1 var(--display);background:linear-gradient(180deg,#FFE0B8,#FDBA74 45%,#F97316);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);max-width:1500px;padding:14px 30px;border-radius:20px;background:rgba(2,10,22,.75);border:1px solid rgba(255,255,255,.12);font:700 32px/1.32 var(--body);text-align:center;text-wrap:balance;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.hero{position:absolute;left:96px;top:250px;width:980px}
+.hero .k{font:800 20px var(--display);letter-spacing:4px;color:#7DD3FC}
+.hero .t1{font:900 96px/1.02 var(--display);margin-top:14px;text-shadow:0 10px 40px rgba(0,0,0,.6)}
+.hero .t1 em{font-style:normal;background:linear-gradient(180deg,#FFE0B8,#FDBA74 45%,#F97316);-webkit-background-clip:text;background-clip:text;color:transparent}
+.goal{margin-top:26px;display:inline-flex;gap:14px;align-items:center;background:linear-gradient(90deg,rgba(20,184,166,.95),rgba(14,165,233,.95));border-radius:20px;padding:14px 22px;font:800 25px/1.3 var(--body)}
+.flt{display:flex;gap:10px;margin-top:18px}
+.flt span{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:9px 16px;font:800 19px var(--body)}
+.lvl{display:inline-block;border-radius:10px;padding:3px 10px;font:800 17px var(--display);color:#fff}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="g"></div><div class="vig"></div>
+  <div class="top" id="top"><div class="brand"><i>ЭКО<br>СКАН</i>Экосканер · География 11 · §22</div><div class="chips" id="chips"></div></div>
+  <div class="hero" id="hero"></div>
+  <div class="panel" id="panel"></div>
+  <div class="sub" id="sub"></div>
+</div>
+<script src="vendor/topojson-client.min.js"></script>
+<script src="data.js"></script>
+<script src="tour-data.js"></script>
+<script src="tour-timing.js"></script>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
+<script type="module">
+import { createGlobe, dist } from './globe.js';
+const T = window.TOUR_T, D = window.TOUR_D, $ = (s) => document.querySelector(s);
+const fitS = () => { $('#stage').style.transform = `scale(${Math.min(innerWidth / 1920, innerHeight / 1080)})`; }; addEventListener('resize', fitS); fitS();
+await Promise.all(['700 20px Montserrat', '800 20px Montserrat', '900 20px Montserrat', '700 20px Nunito', '800 20px Nunito'].map((f) => document.fonts.load(f, 'Қазақ')));
+const G = await createGlobe($('#g'), { manual: true, shift: 0.17, labelMinX: 1000 });
+const clamp = (x) => Math.max(0, Math.min(1, x)), ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2), sm = (a, b, x) => clamp((x - a) / (b - a));
+const DISP = [[/бензапирен/g, 'бенз(а)пирен'], [/нөл бүтін сегіз/, '0,8'], [/үш бүтін бес/, '3,5'], [/бес бүтін үш/, '5,3'], [/қырық бүтін тоғыз/, '40,9'], [/он бекет/, '10 бекет'], [/бесінші класы/, '5-класы'], [/бесінші класс/g, '5-класс'], [/үшінші кластан бесінші класқа/, '3-кластан 5-класқа'], [/бірінші класс/, '1-класс'], [/алтыншы класс/, '6-класс'], [/Бірінші класс/, 'I класс'], [/Екінші класс/, 'II класс'], [/Үшінші класс/, 'III класс'], [/Төртінші класс/, 'IV класс']];
+const disp = (s) => DISP.reduce((a, [r, v]) => a.replace(r, v), s);
+/* камера кадрлары: бүкіл бейне бойынша */
+const KF = []; T.forEach((sc, i) => D[i].keys.forEach((k) => KF.push({ t: sc.start + (k.s ? sc.subs[k.s].a - 0.4 : 0), cam: k.cam, sc: i, spots: k.spots || [] })));
+function camAt(t) {
+  let k = 0; for (let j = 0; j < KF.length; j++) if (KF[j].t <= t) k = j;
+  const b = KF[k], a = KF[Math.max(0, k - 1)], u = t - b.t;
+  if (k === 0) { const e = ease(sm(0, 8, t)); return { lat: 8 + 14 * e, lon: -30 + 50 * e + t * 1.0, d: 70 - 24 * e }; }
+  const dr = (c) => 0.25 * Math.min(1, c[2] / 40) ** 2;
+  const pa = { lat: a.cam[0], lon: k === 1 ? 20 + b.t * 1.0 : a.cam[1] + Math.max(0, b.t - a.t - 3.4) * dr(a.cam), d: a.cam[2] };
+  const e = ease(sm(0.1, 3.4, u)), far = Math.min(16, dist([pa.lat, pa.lon], [b.cam[0], b.cam[1]]) / 6), dl = ((b.cam[1] - pa.lon + 540) % 360) - 180;
+  return { lat: pa.lat + (b.cam[0] - pa.lat) * e, lon: pa.lon + dl * e + Math.max(0, u - 3.4) * dr(b.cam), d: pa.d + (b.cam[2] - pa.d) * e + far * Math.sin(Math.PI * e) };
+}
+const R = (on, ic, col, html) => `<div class="row" style="opacity:${on};transform:translateX(${(1 - on) * -30}px);${on > 0.99 && col ? `border-color:${col}88` : ''}"><span class="ic" style="background:${col}33">${ic}</span><div style="flex:1">${html}</div></div>`;
+function panel(i, u, sc) {
+  const d = D[i], S = (k) => (sc.subs[k] ? sm(sc.subs[k].a - 0.2, sc.subs[k].a + 0.5, u) : 0);
+  const H = `<div class="eb" style="color:${d.c}">${d.eb}</div><div class="nm">${d.title}</div>`;
+  if (d.kind === 'ind') return H + DATA.indicators.map((x, k) => R(S(k + 2), x[0], x[2], `<b>${x[1]}</b><small>${x[3]}</small>`)).join('') + R(S(6), '🚫', '#EF4444', `<b style="text-decoration:line-through">Халық саны</b><small>сапа көрсеткіші ЕМЕС</small>`) + `<div class="src">${d.src}</div>`;
+  if (d.kind === 'norm') return H + `<div class="row" style="opacity:${S(1)};background:linear-gradient(90deg,rgba(20,184,166,.35),rgba(14,165,233,.2))"><span class="big" style="font-size:52px">ШШК</span><span style="font-size:22px">= адамға зиян тигізбейтін <b>ең жоғары мөлшер</b><small>мыс.: ацетон — 0,35 мг/м³</small></span></div>` + DATA.norms.map((x, k) => R(S(k + 3), x[0], '#14B8A6', `<b>${x[1]}</b><small>${x[2]}</small>`)).join('') + `<div class="src">${d.src}</div>`;
+  if (d.kind === 'haz') return H + `<div class="row" style="opacity:${S(1)};font-style:italic;font-size:23px;background:rgba(249,115,22,.16)">«Бәрі — у, бәрі — дәрі, уды <b style="color:#FDBA74">мөлшері</b> анықтайды» <small style="margin-left:auto;font-style:normal">— Парацельс</small></div>` + DATA.hazard.map((x, k) => R(S(k + 3), `<b style="font:900 26px var(--display);color:#fff">${x[0]}</b>`, x[2], `<b>${x[0]} класс — ${x[1]}</b><small>${x[3].join(' · ')}</small>`)).join('') + `<div class="src">${d.src}</div>`;
+  if (d.kind === 'si') { const mx = Math.sqrt(41);
+    return H + `<div style="opacity:${S(3)};display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${DATA.grad.map((g) => `<div style="background:${g[3]};border-radius:14px;padding:10px 10px;text-align:center"><b style="font:800 18px var(--display)">${g[0]}</b><div style="font-size:17px;font-weight:800;margin-top:4px">СИ ${g[1]}<br>ЕЖҚ ${g[2]}</div></div>`).join('')}</div>
+      <div style="opacity:${S(4)};margin-top:12px;font:800 20px var(--body);color:#FDBA74">⚖️ СИ мен ЕЖҚ-ның жоғарысы бойынша анықталады</div>
+      <div style="margin-top:12px">${DATA.cities.map((c, k) => { const o = S(k + 5), g = DATA.grad[c.lv]; return `<div style="display:flex;align-items:center;gap:12px;margin-top:9px;opacity:${o}"><b style="width:150px;font:800 22px var(--display)">${c.n}</b><div style="flex:1;height:30px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden"><i style="display:block;height:100%;width:${Math.sqrt(c.si) / mx * 100 * ease(o)}%;background:${g[3]};border-radius:10px"></i></div><b style="width:72px;text-align:right;font:900 26px var(--display)">${String(c.si).replace('.', ',')}</b><span class="lvl" style="background:${g[3]};width:140px;text-align:center">${g[0]}</span></div>`; }).join('')}</div><div class="src">${d.src}</div>`; }
+  if (d.kind === 'water') return H + `<div style="opacity:${S(2)};display:grid;grid-template-columns:repeat(6,1fr);gap:6px">${DATA.water.map((w) => `<div style="background:${w[2]};border-radius:14px;padding:12px 6px;text-align:center;position:relative"><b style="font:900 34px var(--display)">${w[0]}</b><div style="font-size:15px;font-weight:800;line-height:1.15;margin-top:2px">${w[1]}</div></div>`).join('')}</div>
+    ${R(S(3), '🏞️', '#B91C1C', '<b>Нұра өзені — 5-класс</b><small>өте ластанған · қалқыма заттар 22,9 мг/дм³</small>')}${R(S(4), '📉', '#C2410C', '<b>Есіл (Астана): 3-класс → 5-класс</b><small>сапасы нашарлады</small>')}<div class="src">${d.src}</div>`;
+  if (d.kind === 'mon') return H + `<div style="display:flex;gap:8px;align-items:stretch">${DATA.monitor.map((m, k) => { const o = sm(sc.subs[1].a + k * 0.9, sc.subs[1].a + k * 0.9 + 0.6, u); return `<div style="flex:1;opacity:${o};background:rgba(0,121,154,.45);border:1px solid rgba(125,211,252,.35);border-radius:16px;padding:10px 8px;text-align:center"><div style="font-size:32px">${m[0]}</div><b style="font:800 15px/1.2 var(--display)">${k + 1}. ${m[1]}</b></div>`; }).join('')}</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;opacity:${S(2)}">${DATA.levels.map((l, k) => { const hl = (k === 3 && S(3) > 0.5 && S(4) < 0.5) || (k === 0 && S(4) > 0.5); return `<div style="border-radius:16px;padding:12px 8px;text-align:center;background:${hl ? 'linear-gradient(180deg,#FDBA74,#F97316)' : 'rgba(255,255,255,.08)'};border:1px solid rgba(255,255,255,.15);transform:scale(${hl ? 1.06 : 1})"><div style="font-size:30px">${l[0]}</div><b style="font:800 17px var(--display)">${l[1]}</b></div>`; }).join('')}</div>
+    ${R(S(4), '📍', '#00799A', '<b>Астана: ауаны 10 бекет бақылайды</b><small>жергілікті деңгей</small>')}<div class="src">${d.src}</div>`;
+  if (d.kind === 'check') return H + `<div class="row" style="opacity:${S(1)};justify-content:center;background:rgba(139,92,246,.25);padding:20px"><span style="font:900 40px var(--display)">C₁/ШШК₁ + C₂/ШШК₂ ≤ 1</span></div>
+    ${R(S(2), '✅', '#16A34A', '<b>0,4 + 0,5 = 0,9 ≤ 1</b><small>ауа нормаға сай</small>')}${R(S(3), '❌', '#EF4444', '<b>0,8 + 0,6 = 1,4 > 1</b><small>норма бұзылған — бір зат жеке нормада болса да!</small>')}${R(S(4), '🤖', '#8B5CF6', '<b>ЖИ айтты ма? — Тексер!</b><small>формуламен, оқулықпен, ресми дереккөзбен</small>')}<div class="src">${d.src}</div>`;
+  if (d.kind === 'fin') { const Q = [['🌍', 'Қай орта?', 'ауа · су · топырақ · табиғи жүйелер'], ['📏', 'Қандай норматив?', 'ШШК · 4 түрі'], ['☣️', 'Қай қауіптілік класы?', 'I–IV'], ['🌫️', 'Ластану деңгейі?', 'СИ / ЕЖҚ'], ['💧', 'Судың класы?', '1–6'], ['📡', 'Мониторинг деңгейі?', 'жергілікті → жаһандық']];
+    return H + `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${Q.map((q, k) => { const o = sc.subs[k] ? sm(sc.subs[k].a - 0.3, sc.subs[k].a + 0.4, u) : 1; return `<div class="row" style="margin:0;opacity:${o}"><span class="ic" style="background:rgba(249,115,22,.25)">${q[0]}</span><div><b>${k + 1}. ${q[1]}</b><small>${q[2]}</small></div></div>`; }).join('')}</div>
+    <div class="goal" style="opacity:${S(6)};margin-top:18px;font-size:22px">🎯 11.3.22 — қоршаған орта сапасының көрсеткіштерін жіктеу</div>`; }
+  return '';
+}
+const TOTAL = T.reduce((s, x) => s + x.dur, 0); let lastScene = -1, lastKF = -1;
+function seek(t) {
+  let i = T.findIndex((x) => t < x.start + x.dur); if (i < 0) i = T.length - 1;
+  const sc = T[i], u = t - sc.start, d = sc.dur;
+  const p = camAt(t); G.pose(p.lat, p.lon, p.d);
+  let k = 0; for (let j = 0; j < KF.length; j++) if (KF[j].t <= t) k = j;
+  if (k !== lastKF || i !== lastScene) { G.clearMarkers(); KF[k].spots.forEach((s, j) => G.marker({ id: 'm' + j, lat: s[1], lon: s[2], label: s[0], color: s[3], dx: s[4] || 0, dy: s[5] || 0, size: 1.0, t0: (KF[k].t + 2.6 + j * 0.6) * 1000, fs: 22 })); lastKF = k; lastScene = i; }
+  $('#chips').innerHTML = [1, 2, 3, 4, 5, 6, 7].map((n) => `<div class="chip ${D[i].n === n ? 'on' : (D[i].n || (i === 8 ? 9 : 0)) > n ? 'done' : ''}">${n}</div>`).join('');
+  $('#top').style.opacity = sm(0.5, 1.5, t);
+  const hero = $('#hero'), sb = (k2) => (sc.subs[k2] ? sm(sc.subs[k2].a - 0.2, sc.subs[k2].a + 0.6, u) : 0);
+  if (i === 0) { hero.innerHTML = `<div class="k">ҚОРШАҒАН ОРТАНЫ СКАНЕРЛЕЙМІЗ</div><div class="t1">Қоршаған ортаның <em>сапасы</em></div><div class="goal" style="opacity:${sb(2)}">🎯 11.3.22 — қоршаған орта сапасының көрсеткіштерін жіктеу</div><div class="flt" style="opacity:${sb(3)}"><span>🌍 ортасы</span><span>📏 нормативі</span><span>☣️ қауіп класы</span><span>🌫️ деңгейі</span></div>`; const o = sm(1, 2.4, u) * (1 - sm(d - 1.2, d - 0.2, u)); hero.style.opacity = o; hero.style.transform = `translateY(${(1 - o) * 30}px)`; } else hero.style.opacity = 0;
+  const P = $('#panel');
+  if (i > 0) { P.innerHTML = panel(i, u, sc); const o = sm(0.9, 1.8, u) * (1 - sm(d - 0.9, d - 0.15, u)); P.style.opacity = o; P.style.transform = `translateX(${(1 - o) * -60}px)`; } else P.style.opacity = 0;
+  const s = sc.subs.find((x) => u >= x.a - 0.15 && u < x.b + 0.3); const SB = $('#sub');
+  if (s) { SB.textContent = disp(s.t); SB.style.opacity = 1; } else SB.style.opacity = 0;
+  G.frame(t * 1000);
+}
+window.TOUR = { seek, TOTAL, ready: true };
+if (/[?&]play/.test(location.search)) { const t0 = performance.now(); (function lp() { const t = (performance.now() - t0) / 1000; if (t < TOTAL) { seek(t); requestAnimationFrame(lp); } })(); }
+else seek(+(new URLSearchParams(location.search).get('t') || 0));
+</script>
+</body>
+</html>

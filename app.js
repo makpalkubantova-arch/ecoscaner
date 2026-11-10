@@ -328,7 +328,7 @@ const R = {
   speak: s => { const ros = store.get("roster", []); const nm = (g, r) => (ros.find(x => x.g === g && x.role === r) || {}).name || (r === "sp1" ? "1-спикер" : "2-спикер");
     const SP = DATA.learnTabs.map((t, i) => ({ i, g: GK[Math.floor(i / 2)], r: i % 2 ? "sp2" : "sp1" }));
     return `<div class="st">${HD(s, "Спикер ғалымның рөліне кіреді: «Мен — …мын. Бүгін мен … түсіндіремін». Экрандағы инфографикаға сүйеніп, қарапайым тілмен 1 минут сөйлейді. Қалғандары №1 кестені толтырады.", "ЖАҢА САБАҚ")}<div class="body learn"><div class="lnav" id="lnav">${SP.map(x => { const G = DATA.groups[x.g]; return `<button data-sp="${x.i}" style="border-bottom:5px solid ${G.c}">${esc(DATA.learnTabs[x.i].t)}<small style="display:block;font-weight:700">🎭 ${esc(nm(x.g, x.r))} — ${esc(SCIN[x.i])} · ${G.i}</small></button>`; }).join("")}<span class="sptim" id="sptim"></span></div><div id="lbox"></div></div></div>`; },
-  video: s => `<div class="st">${HD(s, "Бейнені мұқият көр: жауаптары глобус сұрақтарында керек болады! Соңында тақырып пен мақсат ашылады.")}<div class="body vid2"><div class="card" style="padding:10px"><video id="vd" controls preload="metadata" poster="media/poster.jpg" playsinline><source src="media/ekoskaner.mp4" type="video/mp4"></video></div>
+  video: s => `<div class="st">${HD(s, "Бейнені мұқият көр: жауаптары глобус сұрақтарында керек болады! Соңында тақырып пен мақсат ашылады.")}<div class="body vid2"><div class="card" style="padding:10px"><video id="vd" controls preload="metadata" poster="media/ekoskaner-sayahat.jpg" playsinline><source src="media/ekoskaner-sayahat.mp4" type="video/mp4"></video></div>
     <div class="card goalc" id="goalc"><button class="btn" id="goalBtn">🎯 Тақырып пен мақсатты ашу</button><div class="goalin" hidden><div class="lbl">Тақырып</div><h3>${esc(L.topic)} <small>(${esc(L.para)})</small></h3><div class="lbl">Оқу мақсаты</div><p>${esc(L.goal)}</p><div class="lbl">Бүгін сен</div>${DATA.tiers.map(([a, b]) => `<p class="tier"><b>${esc(a)}:</b> ${esc(b)}</p>`).join("")}<div class="lbl">Бағалау</div><p class="sm">${TASKS.map(k => `${esc((ST.find(x => x.id === k) || {}).title || k)} — ${PTS[k]}`).join(" · ")} · барлығы ${MAXP} ұпай → 10 балл</p></div></div></div></div>`,
   globe: s => `<div class="st">${HD(s, "Глобус әлемнен Қазақстанға айналады. Оқушы кездейсоқ таңдалады → тақтаға шығып жауапты басады → бірден дұрыс/қате және балл.")}<div class="body glb" id="glwrap"><div class="card glc"><canvas id="glcv"></canvas><div class="gltop"><span id="glLv">🌍 → 🇰🇿</span><span id="glN"></span><button id="glReset" title="Басынан">↺</button></div></div><div class="glside"><div class="card" id="glQ"></div><div class="card glg"><div class="lbl">Топтардың дұрыс жауабы</div><div id="glG"></div></div></div></div></div>`,
   learn: s => `<div class="st">${HD(s, "Оқулықтағы 25–28-сызбалар · әр қадамда нақты мысал және жедел сұрақ", "ЖАҢА САБАҚ")}<div class="body learn"><div class="lnav" id="lnav">${DATA.learnTabs.map((t, i) => `<button data-l="${i}">${esc(t.t)}</button>`).join("")}</div><div id="lbox" class="lbox"></div></div></div>`,
@@ -372,8 +372,16 @@ function learn(i) {
   $$("#lnav button").forEach((b, k) => b.classList.toggle("on", k === i));
 }
 
+/* Экранға сыйдыру: мазмұн тақтадан асып кетсе, кезеңді біркелкі кішірейтеміз (мин. 72%) */
+function fitStage() { const m = $("#main"), st = $("#main .st"); if (!m || !st) return; st.style.zoom = 1;
+  const top = st.getBoundingClientRect().top, H = st.getBoundingClientRect().height; let need = 0;
+  st.querySelectorAll("*").forEach(e => { if (e.closest(".lpane,.labg,.qs,.allr,.glside") && !e.matches(".lpane,.labg,.qs,.allr,.glside")) return; const r = e.getBoundingClientRect(); if (r.height) need = Math.max(need, r.bottom - top); });
+  st.querySelectorAll(".lpane,.labg,.qs").forEach(e => { const r = e.getBoundingClientRect(); need = Math.max(need, r.top - top + e.scrollHeight * (r.height / e.offsetHeight || 1)); });
+  if (need > H + 2) st.style.zoom = Math.max(.72, H / need).toFixed(3); }
+addEventListener("resize", () => setTimeout(fitStage, 50));
+let fitT = 0; if (MODE === "b") new MutationObserver(() => { clearTimeout(fitT); fitT = setTimeout(fitStage, 120); }).observe(document.getElementById("main"), { childList: true, subtree: true });
 function render() {
-  const s = ST[cur]; document.body.dataset.part = s.part; $("#main").innerHTML = R[s.id](s); seen.clear();
+  const s = ST[cur]; document.body.dataset.part = s.part; $("#main").innerHTML = R[s.id](s); seen.clear(); setTimeout(fitStage, 60); setTimeout(fitStage, 700);
   if (!$("#main .stu") && s.id !== "invite") { const hd = $("#main .hd"), sb = stuBar(s.id); if (sb) { if (hd) hd.insertAdjacentHTML("afterend", sb); else $("#main").insertAdjacentHTML("afterbegin", sb); } }
   if (s.id === "invite") $("#startBtn").onclick = () => clkStart ? go(1, true) : startLesson();
   if (s.id === "speak") { $("#lnav").onclick = e => { const b = e.target.closest("[data-sp]"); if (!b) return; const i = +b.dataset.sp; learn(i); spkNow(i, b); spkTimer(60, b.querySelector("small").textContent); $$("#lnav [data-sp]").forEach(x => x.classList.toggle("on", x === b)); }; learn(0); }
@@ -395,8 +403,18 @@ async function globeInit() {
   const cv = $("#glcv"); if (!cv) return;
   if (!GW) { try { const w = await (await fetch("vendor/countries-110m.json")).json(); GW = { land: topojson.feature(w, w.objects.countries), kz: topojson.feature(w, w.objects.countries).features.find(f => f.id === "398") }; } catch { GW = { land: null }; } }
   const Q = DATA.globeQ, st = () => store.get("gl", { qi: -1, done: {}, pts: {}, grp: {}, picked: [] }), save = v => store.set("gl", v);
+  /* 3D глобус (three.js, NASA Blue Marble); WebGL жоқ болса — бұрынғы 2D глобус */
+  let G3 = null, fly, idle = true;
+  try { const M = await import("./globe.js"); const host = document.createElement("div"); host.id = "gl3"; host.style.cssText = "position:absolute;inset:0"; cv.replaceWith(host); host.appendChild(cv); cv.style.display = "none";
+    G3 = await M.createGlobe(host, { spin: 6, shift: 0 }); }
+  catch (e) { console.warn("3D глобус ашылмады", e); G3 = null; }
+  const mk3 = () => { if (!G3) return; const s = st(); G3.clearMarkers(); Q.forEach((q, i) => { const act = i === s.qi, dn = s.done[i] != null;
+    G3.marker({ id: "q" + i, lat: q.lat, lon: q.lon, label: act ? `${i + 1}. ${esc(q.p)}` : (dn ? (s.done[i] ? "✓" : "✗") : String(i + 1)), fs: act ? 22 : 14, size: act ? 1.3 : .8, color: dn ? (s.done[i] ? "#16A34A" : "#DC2626") : act ? "#F97316" : "#0EA5E9" }); }); };
+  let size = () => {};
+  if (G3) { fly = (lon, lat, sc) => { idle = false; G3.setSpin(0); G3.flyTo(lat, lon, sc > 2 ? 17 : sc > 1.3 ? 26 : 32, 2000); }; G3.pose(30, 40, 34); }
+  else {
   const ctx = cv.getContext("2d"), DPR = Math.min(2, window.devicePixelRatio || 1);
-  const size = () => { const r = cv.getBoundingClientRect(); cv.width = r.width * DPR; cv.height = r.height * DPR; };
+  size = () => { const r = cv.getBoundingClientRect(); cv.width = r.width * DPR; cv.height = r.height * DPR; };
   size();
   const proj = d3.geoOrthographic().clipAngle(90), path = d3.geoPath(proj, ctx), grat = d3.geoGraticule10();
   const draw = (t) => {
@@ -417,16 +435,17 @@ async function globeInit() {
       ctx.fillStyle = dn || act ? "#fff" : "#0B2545"; ctx.font = `800 ${(act ? 12 : 9) * DPR}px Golos Text, sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(String(i + 1), x, y + .5);
       if (act || glScale > 2) { ctx.font = `700 ${12 * DPR}px Golos Text, sans-serif`; ctx.fillStyle = "#0B2545"; ctx.strokeStyle = "rgba(255,255,255,.9)"; ctx.lineWidth = 4 * DPR; ctx.strokeText(q.p, x, y - r - 9 * DPR); ctx.fillText(q.p, x, y - r - 9 * DPR); } });
   };
-  let target = null, from = null, t0 = 0, idle = true;
+  let target = null, from = null, t0 = 0;
   const loop = t => { if (!$("#glcv")) { cancelAnimationFrame(glAnim); return; }
     if (target) { const k = Math.min(1, (t - t0) / 1600), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; const ip = d3.geoInterpolate(from.c, target.c)(e); glRot = [-ip[0], -ip[1]]; glScale = from.s + (target.s - from.s) * e; if (k >= 1) target = null; }
     else if (idle) glRot = [glRot[0] + .08, glRot[1]];
     draw(t); glAnim = requestAnimationFrame(loop); };
   cancelAnimationFrame(glAnim); glAnim = requestAnimationFrame(loop);
-  const fly = (lon, lat, sc) => { from = { c: [-glRot[0], -glRot[1]], s: glScale }; target = { c: [lon, lat], s: sc }; t0 = performance.now(); idle = false; };
+  fly = (lon, lat, sc) => { from = { c: [-glRot[0], -glRot[1]], s: glScale }; target = { c: [lon, lat], s: sc }; t0 = performance.now(); idle = false; };
+  }
   window.onresize = size;
   const ros = () => store.get("roster", []);
-  const paint = () => { const s = st(), q = Q[s.qi];
+  const paint = () => { mk3(); const s = st(), q = Q[s.qi];
     $("#glN").textContent = s.qi < 0 ? `${Q.length} сұрақ` : `${s.qi + 1} / ${Q.length}`;
     $("#glLv").textContent = q ? (q.lv === "Әлем" ? "🌍 Әлем" : "🇰🇿 Қазақстан") : "🌍 → 🇰🇿";
     $("#glG").innerHTML = GK.map(g => { const G = DATA.groups[g]; return `<div style="--gc:${G.c}"><span>${G.i} ${esc(G.city)}</span><b>${s.grp[g] || 0}</b></div>`; }).join("");
@@ -455,7 +474,7 @@ async function globeInit() {
     save(s); paint(); };
   $("#glwrap").onclick = e => { if (e.target.closest("#glNext")) next(); else if (e.target.closest("#glPick")) pick(); else { const b = e.target.closest("[data-ga]"); if (b) answer(+b.dataset.ga); } };
   $("#glReset").onclick = () => { if (confirm("Глобусты басынан бастаймыз ба?")) { store.del("gl"); fly(30, 20, 1); paint(); } };
-  const s = st(); if (Q[s.qi]) { const q = Q[s.qi]; glRot = [-q.lon, -q.lat]; glScale = q.lv === "Әлем" ? 1.15 : 2.6; idle = false; }
+  const s = st(); if (Q[s.qi]) { const q = Q[s.qi]; if (G3) G3.pose(q.lat, q.lon, q.lv === "Әлем" ? 32 : 17); else { glRot = [-q.lon, -q.lat]; glScale = q.lv === "Әлем" ? 1.15 : 2.6; idle = false; } }
   paint();
 }
 
