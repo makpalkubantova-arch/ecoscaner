@@ -144,20 +144,35 @@ const TASK = {
     };
   },
   t4(root) {
-    const E = DATA.t4, s = { a: E.a.c, b: E.b.c };
-    root.innerHTML = `<div class="exp" style="margin-bottom:10px">🤖 Тақтада ЖИ-ге сұрақ қойылды. Оның жауабын және оқулықтағы шешімді осы есептегішпен тексер — шешімді өзің қабылда.</div><div class="labg"><div class="labc">
-        ${["a", "b"].map(k => `<div class="lab-r"><div class="h"><b>${E[k].n}</b><span>ШШК = ${fmt(E[k].pdk, 2)} мг/м³</span></div><input type="range" data-k="${k}" min="0" max="${E[k].pdk * 2}" step="${E[k].pdk / 200}" value="${E[k].c}"><div class="v"><span data-v="${k}"></span> мг/м³</div></div>`).join("")}
-        <div class="lab-f" data-f></div><div class="meter"><i data-m></i><div class="one">1,0 — шек</div></div><div class="verd" data-vd></div>
-        <button class="btn am" data-a="book">📖 Оқулықтағы мәндер (93-б.)</button></div><div data-qs></div></div>`;
-    const calc = () => { const ra = s.a / E.a.pdk, rb = s.b / E.b.pdk, sum = ra + rb, ok = sum < 1;
-      $("[data-v=a]", root).textContent = fmt(s.a, 3); $("[data-v=b]", root).textContent = fmt(s.b, 4);
-      $("[data-f]", root).innerHTML = `${fmt(ra, 3)} + ${fmt(rb, 3)} = <span class="${ok ? "ok" : "bad"}">${fmt(sum, 3)}</span>`;
-      const m = $("[data-m]", root); m.style.width = Math.min(100, sum * 50) + "%"; m.style.background = ok ? "linear-gradient(90deg,#10B981,#00799A)" : "linear-gradient(90deg,#F59E0B,#DC2626)";
-      const v = $("[data-vd]", root); v.className = "verd " + (ok ? "ok" : "bad"); v.textContent = ok ? "Қосынды < 1 — нормаға сай" : "Қосынды ≥ 1 — нормадан асады!"; };
-    $$("input", root).forEach(i => i.oninput = () => { s[i.dataset.k] = +i.value; calc(); });
-    $("[data-a=book]", root).onclick = () => { s.a = E.a.c; s.b = E.b.c; $$("input", root).forEach(i => i.value = s[i.dataset.k]); calc(); toast("Оқулықта 0,996 деп жазылған. Тексеріп көр!"); };
-    calc(); TASK.mcq($("[data-qs]", root), E.q, "t4", true, { perfect: "Оқулықтағы қатені дәлелдедің! 🔍" });
+    /* «ЖИ-ді тексер»: жағдай → ереже → 4 қадам (әрқайсысы басқанда ашылады) → 3 сұрақ */
+    const E = DATA.t4, A = E.a, B = E.b, ra = A.c / A.pdk, rb = B.c / B.pdk, sum = ra + rb, f = (v, d = 3) => fmt(+v.toFixed(d), d);
+    const ST4 = [
+      { q: `<b>1-қадам.</b> Ацетон нормадан қанша бөлігі? <span class="frm">${f(A.c)} ÷ ${f(A.pdk, 2)} = ?</span>`, a: `= <b>${f(ra)}</b> <small>(нормаға жуық, бірақ аспайды)</small>` },
+      { q: `<b>2-қадам.</b> Фенол нормадан қанша бөлігі? <span class="frm">${f(B.c)} ÷ ${f(B.pdk, 2)} = ?</span>`, a: `= <b>${f(rb, 1)}</b> <small>⚠ ЖИ мұнда 0,9-ға бөліп, 0,01 деп қате тапқан</small>` },
+      { q: `<b>3-қадам.</b> Екеуін қос: <span class="frm">${f(ra)} + ${f(rb, 1)} = ?</span>`, a: `= <b class="bad">${f(sum)}</b>` },
+      { q: `<b>4-қадам.</b> Қосынды 1-ден аса ма? Ауа нормада ма?`, a: `<b class="bad">${f(sum)} &gt; 1</b> → ауа <b class="bad">нормаға сай емес</b>. ЖИ қателесті!` }
+    ];
+    let open = 0;
+    root.innerHTML = `<div class="ai4">
+      <div class="ai4-l">
+        <div class="ai4-box"><div class="lbl">🔍 Жағдай</div><p>Зауыт маңындағы ауадан <b>екі зат</b> табылды. Олар адамға <b>бірге</b> әсер етеді.</p>
+          <table class="ai4-t"><tr><th>Зат</th><th>Өлшенді (C)</th><th>ШШК</th></tr><tr><td>🧪 ${A.n}</td><td>${f(A.c)} мг/м³</td><td>${f(A.pdk, 2)}</td></tr><tr><td>🧪 ${B.n}</td><td>${f(B.c)} мг/м³</td><td>${f(B.pdk, 2)}</td></tr></table><div class="ai4-rl">📏 <b>Ереже:</b> <span class="rule">C₁÷ШШК₁ + C₂÷ШШК₂</span> <span class="sm">≤ 1 — нормада ✅ · &gt; 1 — норма бұзылған ❌</span></div></div>
+        <div class="ai4-box ai4-bot"><div class="lbl">🤖 ЖИ-дің жауабы</div><p>«Қосынды <b>0,996</b>. Бұл 1-ден аз — <b>ауа таза, нормада</b>.»</p><p class="sm">Оқулықта да осылай жазылған (93-б.). Сенуге бола ма?</p></div>
+        <div class="ai4-q"><div class="lbl">✅ Өзіңді тексер: 3 сұрақ</div><div data-qs></div></div>
+      </div>
+      <div class="ai4-r"><div class="lbl">✍️ Өзің тексер — 4 қадам</div><div class="ai4-steps"></div>
+        <div class="meter ai4-m" hidden><i data-m></i><div class="one">1 — шек</div></div>
+        <div class="trow"><button class="btn" data-a="next">👁 Келесі қадамды ашу</button><button class="btn lt" data-a="reset">↺ Басынан</button></div>
+      </div></div>`;
+    const draw = () => {
+      $(".ai4-steps", root).innerHTML = ST4.map((x, i) => `<div class="ai4-s ${i < open ? "on" : ""} ${i === open ? "cur" : ""}"><div class="q">${x.q}</div>${i < open ? `<div class="a">${x.a}</div>` : `<div class="a wait">Жұмыс парағында есепте…</div>`}</div>`).join("");
+      const m = $(".ai4-m", root); m.hidden = open < 3; const i = $("[data-m]", root); i.style.width = Math.min(100, sum * 50) + "%"; i.style.background = "linear-gradient(90deg,#F59E0B,#DC2626)";
+      $("[data-a=next]", root).hidden = open >= ST4.length; };
+    $("[data-a=next]", root).onclick = () => { open = Math.min(ST4.length, open + 1); draw(); if (open === ST4.length && typeof confetti === "function") confetti(40); };
+    $("[data-a=reset]", root).onclick = () => { open = 0; draw(); };
+    draw(); TASK.mcq($("[data-qs]", root), E.q, "t4", true, { perfect: "ЖИ-дің қатесін таптың! 🔍" });
   },
+
   t5(root) {
     const T = DATA.t5; let ord = store.get("t5o", []);
     const mix = store.get("t5mix", null) || shuffle(T.order.map((_, i) => i)); store.set("t5mix", mix);
@@ -348,7 +363,7 @@ const R = {
       return `<div class="dos" style="--gc:${G.c}"><div class="dos-h">${G.i} <b>${esc(G.n)}</b><span>${esc(D.period)}</span></div><div class="dos-g">${gauge(D.si, D.ez)}<div class="dos-k"><div><small>СИ</small><b>${fmt(D.si)}</b></div><div><small>ЕЖҚ</small><b>${fmt(D.ez)}%</b></div></div></div>${hbars(D.air.slice(0, 4), Math.max(...D.air.map(a => a[1])) * 1.1)}<ul class="dos-f">${D.facts.slice(0, 2).map(f => `<li>${esc(f)}</li>`).join("")}</ul>
       <div class="dos-r" id="gr-${g}"><p class="muted sm">Топтың жауабы күтілуде… 📡</p></div><div class="bon">Қорғау: <button data-bonus="${g}" data-v="1">+1</button><button data-bonus="${g}" data-v="2">+2</button><b id="bo-${g}"></b></div></div>`; }).join("")}</div>
       </div></div>`,
-  t4: s => `<div class="st">${HD(s, "Оқулық пен ЖИ: «0,996 &lt; 1 — нормада». Тексер: 0,345 : 0,35 = <b>0,986</b> (берілген) → 0,009 : 0,01 = ? → қосынды = ? → нормада ма?", modeBadge(s))}<div class="body task">${howStrip("t4")}<div class="card tk" id="tk"></div>${descPanel("t4")}</div></div>`,
+  t4: s => `<div class="st">${HD(s, "ЖИ: «ауа таза, нормада» дейді. Сен ережемен <b>4 қадамда</b> тексер: ЖИ дұрыс па?", modeBadge(s))}<div class="body task">${howStrip("t4")}<div class="card tk" id="tk"></div>${descPanel("t4")}</div></div>`,
   t5: s => `<div class="st">${HD(s, "А. 27-сызба: мониторингтің 4 кезеңін ретімен нөмірле. Б. Жағдаят: ластануды көрсең, заңды әрекетті таңда.", modeBadge(s))}<div class="body task">${howStrip("t5")}<div class="card tk" id="tk"></div>${descPanel("t5")}</div></div>`,
   t6: s => `<div class="st">${HD(s, "Телефонды ал → QR → атың → 6 сұрақ. Жүйе бірден тексереді.", modeBadge(s))}<div class="body task">${howStrip("t6")}<div class="card tk" id="tk"></div>${resPanel("t6")}</div></div>`,
   sum: s => `<div class="st">${HD(s, `Хатшылардың балы + глобус + квиз → ${MAXP} ұпай → 10 балл. 8–10 жоғары · 4–7 орта · 1–3 төмен.`)}<div class="body sum3">
