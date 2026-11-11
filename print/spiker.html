@@ -2,70 +2,51 @@
 <html lang="kk"><head><meta charset="utf-8">
 <title>Спикер карточкалары · Экосканер</title>
 <link rel="stylesheet" href="../vendor/golos.css">
-<script src="../data.js"></script><script src="spiker-data.js"></script><script src="icons.js"></script>
+<script src="../data.js"></script><script src="spiker-data.js"></script>
 <style>
 @page{size:A4 landscape;margin:0}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Golos Text',sans-serif;color:#13233a;background:#d9e3ee;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .page{width:297mm;height:210mm;background:#fff;margin:0 auto 8mm;position:relative;overflow:hidden;page-break-after:always}
 @media print{body{background:#fff}.page{margin:0}}
-/* FRONT — сыныпқа көрсетілетін бет */
-.front{display:grid;grid-template-columns:118mm 1fr;color:#fff;background:var(--c2)}
-.front .ph{position:relative;display:grid;place-items:center;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.28),rgba(255,255,255,.04) 60%)}.front .ph svg{width:62mm;height:62mm;opacity:.95}.front .sci{position:absolute;left:8mm;right:8mm;bottom:8mm;background:rgba(255,255,255,.95);color:#13233a;border-radius:4mm;padding:2.6mm 3.2mm;font-size:9.5pt;line-height:1.3}.front .sci b{display:block;color:var(--c2);font-size:10.5pt}
-
-.front .num{position:absolute;left:8mm;top:8mm;width:24mm;height:24mm;border-radius:50%;background:#fff;color:var(--c2);display:grid;place-items:center;font-size:40pt;font-weight:800;z-index:2;box-shadow:0 2mm 6mm rgba(0,0,0,.25)}
-.front .bd{padding:10mm 11mm 9mm 4mm;display:flex;flex-direction:column;gap:4mm}
-.front .role{display:inline-block;align-self:flex-start;background:#FFE38A;color:#3b2a00;font-weight:800;font-size:14pt;border-radius:9mm;padding:1.2mm 5mm}.front .k{font-size:10pt;font-weight:800;letter-spacing:.14em;opacity:.85}
-.front h1{font-size:30pt;line-height:1.05;font-weight:800}
-.front .big{display:flex;align-items:baseline;gap:4mm;background:rgba(255,255,255,.14);border-radius:5mm;padding:3mm 5mm}
-.front .big b{font-size:44pt;font-weight:800;color:#FFE38A;line-height:1;white-space:nowrap}
-.front .big span{font-size:13pt;font-weight:600;line-height:1.2}
-.steps{display:grid;grid-template-columns:1fr 1fr;gap:3.4mm;margin-top:auto}.st{min-height:24mm}
-.st{background:#fff;color:#13233a;border-radius:4mm;padding:2.6mm 3.4mm;display:flex;gap:2.6mm;align-items:flex-start}
-.st i{font-style:normal;flex:none;width:8mm;height:8mm;border-radius:50%;background:var(--c2);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12pt}
-.st small{display:block;font-size:8pt;font-weight:800;color:var(--c2);text-transform:uppercase;letter-spacing:.06em}
-.st b{font-size:14pt;line-height:1.15}
-/* BACK — спикердің сөзі */
-.back{padding:9mm 11mm;display:grid;grid-template-columns:1fr 70mm;gap:7mm}
-.back .hd{grid-column:1/3;display:flex;align-items:center;gap:4mm;border-bottom:.8mm solid var(--c2);padding-bottom:3mm}
-.back .hd .n{width:13mm;height:13mm;border-radius:50%;background:var(--c2);color:#fff;display:grid;place-items:center;font-weight:800;font-size:20pt}
-.back .hd h2{font-size:17pt;line-height:1.1;color:var(--c2)}
-.back .hd p{font-size:9.5pt;color:#5B6B66;font-weight:700}
-.back .hd .who{margin-left:auto;text-align:right;font-size:10pt;font-weight:700;color:#5B6B66}
-.sp{display:flex;flex-direction:column;gap:2.4mm}
-.sp p{font-size:13.2pt;line-height:1.36;padding-left:18.5mm;position:relative}
-.sp p em{position:absolute;left:0;top:.6mm;font-style:normal;font-size:8pt;font-weight:800;color:#fff;background:var(--c2);border-radius:9mm;padding:.4mm 1.8mm}
-.side{display:flex;flex-direction:column;gap:3mm}
-.box{border-radius:4mm;padding:3mm 3.6mm;background:var(--soft);font-size:9.5pt;line-height:1.35}
-.box h3{font-size:9.5pt;color:var(--c2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1mm}
-.box ol{padding-left:4.5mm}
-.tips li{margin-bottom:.8mm}
-.ft{position:absolute;left:11mm;right:11mm;bottom:4.5mm;display:flex;justify-content:space-between;font-size:7.5pt;color:#8a98aa}
+/* СЫРТЫ: тақырып + сурет (сыныпқа көрсетіледі) */
+.front{display:grid;grid-template-columns:1fr 1fr;background:linear-gradient(135deg,var(--c2),var(--c3));color:#fff}
+.front .art{display:grid;place-items:center;padding:12mm}.front .art svg{width:120mm;height:120mm}
+.front .tx{padding:16mm 16mm 16mm 4mm;display:flex;flex-direction:column;justify-content:center;gap:7mm}
+.front .no{width:26mm;height:26mm;border-radius:50%;background:#fff;color:var(--c2);display:grid;place-items:center;font-size:44pt;font-weight:800}
+.front .k{font-size:13pt;font-weight:800;letter-spacing:.16em;opacity:.85}
+.front h1{font-size:52pt;line-height:1.02;font-weight:800}
+.front .big{display:flex;align-items:baseline;gap:5mm}.front .big b{font-size:60pt;font-weight:800;color:#FFE38A;line-height:1}.front .big span{font-size:16pt;font-weight:700;line-height:1.2}
+.front .who{background:rgba(255,255,255,.95);color:#13233a;border-radius:6mm;padding:4mm 6mm;font-size:15pt;font-weight:800}
+.front .who small{display:block;font-size:11pt;font-weight:600;color:#5B6B66;margin-top:1mm}
+/* ІШІ: спикердің сөзі */
+.back{padding:12mm 16mm 12mm;display:flex;flex-direction:column;gap:5mm}
+.back .hd{display:flex;align-items:center;gap:5mm;border-bottom:1mm solid var(--c2);padding-bottom:4mm}
+.back .hd .n{width:16mm;height:16mm;border-radius:50%;background:var(--c2);color:#fff;display:grid;place-items:center;font-weight:800;font-size:24pt;flex:none}
+.back .hd h2{font-size:24pt;line-height:1.1;color:var(--c2)}.back .hd p{font-size:12pt;color:#5B6B66;font-weight:700}
+.back .hd .tm{margin-left:auto;background:var(--soft);color:var(--c2);font-weight:800;font-size:14pt;border-radius:9mm;padding:2mm 6mm;white-space:nowrap}
+.sp{display:flex;flex-direction:column;gap:4.6mm}
+.sp p{font-size:19pt;line-height:1.4}
+.sp p.q{background:var(--soft);border-left:2.5mm solid var(--c2);border-radius:3mm;padding:3mm 5mm;font-weight:800;color:var(--c2)}
+.ft{position:absolute;left:16mm;right:16mm;bottom:5mm;display:flex;justify-content:space-between;font-size:8pt;color:#8a98aa}
 </style></head><body>
+<script src="spiker-scenes.js"></script>
 <script>
-const SP = window.SPEECH, I = window.ICONS, TB = DATA.learnTabs, DARK = { g1: "#991B1B", g2: "#9A3412", g3: "#0369A1" }, SOFT = { g1: "#FDECEC", g2: "#FFF0E6", g3: "#E6F6FD" };
-const LAB = ["1", "2", "3", "4"];
-const TIME = ["0–5 с", "5–20 с", "20–35 с", "35–45 с", "45–52 с", "52–60 с"];
+const SP = window.SPEECH, TB = DATA.learnTabs, DARK = { g1: "#991B1B", g2: "#9A3412", g3: "#0369A1" }, DARK3 = { g1: "#C2410C", g2: "#B45309", g3: "#0E7490" }, SOFT = { g1: "#FDECEC", g2: "#FFF0E6", g3: "#E6F6FD" };
 let h = "";
 SP.forEach((sp, k) => {
-  const G = DATA.groups[sp.g], c2 = DARK[sp.g], soft = SOFT[sp.g], tab = TB[sp.tab], title = tab.t.replace(/^\d+ · /, "");
-  const role = `${G.n} · ${sp.n}`;
-  h += `<section class="page front" style="--c2:${c2};--soft:${soft}">
-    <div class="ph">${I[sp.ico]("#fff")}<div class="num">${k + 1}</div><div class="sci"><b>🎭 Сенің рөлің: ${sp.sci}</b>${sp.sciT}</div></div>
-    <div class="bd"><div class="k">6 СПИКЕР · ${k + 1}-БӨЛІМ · ${role.toUpperCase()}</div><div class="role">🎭 Мен — ${sp.sci.split(" (")[0]}</div><h1>${title}</h1>
+  const G = DATA.groups[sp.g], c2 = DARK[sp.g], tab = TB[sp.tab], title = tab.t.replace(/^\d+ · /, ""), sci = sp.sci.split(" (")[0];
+  const st = `--c2:${c2};--c3:${DARK3[sp.g]};--soft:${SOFT[sp.g]}`;
+  h += `<section class="page front" style="${st}">
+    <div class="art">${window.SCENES[k]}</div>
+    <div class="tx"><div class="no">${k + 1}</div><div class="k">${k + 1}-СПИКЕР · ${G.n.toUpperCase()}</div><h1>${title}</h1>
       <div class="big"><b>${sp.big}</b><span>${sp.bigT}</span></div>
-      <div class="steps">${sp.kw.map((w, i) => `<div class="st"><i>${i + 1}</i><div><b>${w}</b></div></div>`).join("")}</div></div>
+      <div class="who">🎭 Мен — ${sp.sci}<small>${sp.sciT}</small></div></div>
   </section>`;
-  h += `<section class="page back" style="--c2:${c2};--soft:${soft}">
-    <div class="hd"><div class="n">${k + 1}</div><div><h2>${title}</h2><p>Сен — ${sp.sci} рөліндесің · тақта: 5-бет → ${k + 1}-бөлім · 60 с · ${tab.src}</p></div><div class="who">${role}<br>Аты-жөні: ____________________</div></div>
-    <div class="sp">${sp.s.map((p, i) => `<p><em>${TIME[i]}</em>${p}</p>`).join("")}</div>
-    <div class="side">
-      <div class="box"><h3>🎭 Рөлге кір</h3><ol class="tips"><li>Сен — <b>${sp.sci.split(" (")[0]}</b>. «Мен…» деп ғалымның атынан сөйле.</li><li>Экранға қарап оқыма — сөзді алдын ала оқып, өз сөзіңмен айт.</li><li>Алдыңғы бетті сыныпқа көрсетіп ұста, сандарды анық айт.</li></ol></div>
-      <div class="box"><h3>Тақтада не болады</h3>Мұғалім ${k + 1}-бөлім батырмасын басады: экранда сенің бөлімің ашылады, «Қазір түсіндіріп жатыр» тақтасы мен 60 секундтық таймер шығады.</div>
-      <div class="box"><h3>Тыңдаушылар</h3>№1 жіктеу кестесіне жазады: негізгі ұғым · мысал, сан · ғалым.</div>
-      <div class="box"><h3>Бағалау</h3>Хатшы «Өзін-өзі басқару» бойынша балл қояды (2 ұпай).</div>
-    </div>
-    <div class="ft"><span>География · 11-сынып · Қоршаған ортаның сапасы · ${DATA.lesson.teacher}</span><span>Екі жақты басу: қысқа жиегі бойынша аудару</span></div>
+  h += `<section class="page back" style="${st}">
+    <div class="hd"><div class="n">${k + 1}</div><div><h2>${title}</h2><p>Сен — ${sci} рөліндесің · ${G.n} · ${sp.n}</p></div><div class="tm">⏱ 1 минут</div></div>
+    <div class="sp">${sp.s.map((p, i) => `<p class="${i === sp.s.length - 1 ? "q" : ""}">${p}</p>`).join("")}</div>
+    <div class="ft"><span>География · 11-сынып · Қоршаған ортаның сапасы · ${tab.src}</span><span>Екі жақты басу: қысқа жиегі бойынша аудару</span></div>
   </section>`;
 });
 document.body.insertAdjacentHTML("beforeend", h);
