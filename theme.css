@@ -211,3 +211,47 @@ body::after,body[data-part]::after{opacity:.0!important}
 .eco-fx span:nth-child(14){left:91%;animation-duration:33s;animation-delay:-22s;font-size:32px!important}
 @keyframes ecoUp{0%{transform:translateY(0) rotate(0);opacity:0}8%{opacity:.85}85%{opacity:.75}100%{transform:translateY(-115vh) rotate(260deg);opacity:0}}
 #stageWrap{z-index:2}
+
+/* ================= Экосканердің өз белгілері: жапырақ-ою жолағы, күн, құстар, бұлттар ================= */
+.eco-deco{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+/* сол жақтағы жапырақ-өрнек жолағы (Көш-қондағы ою жолағы сияқты, бірақ эко-түстерде) */
+.eco-band{position:absolute;left:0;top:0;bottom:0;width:30px;background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='44' viewBox='0 0 30 44'%3E%3Cpath d='M15 4 C24 10 24 20 15 26 C6 20 6 10 15 4Z' fill='%23ffffff' opacity='.95'/%3E%3Cpath d='M15 6 L15 40' stroke='%23ffffff' stroke-width='2' opacity='.7'/%3E%3Ccircle cx='15' cy='36' r='3' fill='%23FFB703'/%3E%3C/svg%3E") center top/30px 44px repeat-y,
+  linear-gradient(180deg,#FFB703,#7BC63A 30%,#00C2A8 60%,#1E9BF0 100%);box-shadow:4px 0 16px -6px rgba(0,80,60,.5)}
+#stageWrap{left:30px}
+/* оң жақ жоғарыдағы күн — баяу айналады */
+.eco-sun{position:absolute;right:-70px;top:-80px;width:340px;height:340px;opacity:.9;filter:drop-shadow(0 0 40px rgba(255,183,3,.7))}
+.eco-sun .rays{fill:#FFC93C;animation:sunSpin 60s linear infinite;transform-origin:0 0}
+.eco-sun .disc{fill:#FFC93C}.eco-sun .halo{fill:none;stroke:#FFE58A;stroke-width:6;opacity:.8}
+@keyframes sunSpin{to{transform:rotate(360deg)}}
+/* құстар — бөлік түсімен, бос аспанда ұшады */
+.ebird{position:absolute;width:70px;fill:var(--pc);opacity:0;animation:ebFly linear infinite;filter:drop-shadow(0 3px 4px rgba(0,40,60,.25))}
+.ebird.eb1{top:16vh;width:86px;animation-duration:34s;animation-delay:-5s}
+.ebird.eb2{top:19vh;width:56px;animation-duration:34s;animation-delay:-6.2s}
+.ebird.eb3{top:13vh;width:48px;animation-duration:34s;animation-delay:-7s}
+.ebird.eb4{top:62vh;width:74px;animation-duration:44s;animation-delay:-22s;fill:var(--pc2)}
+.ebird.eb5{top:66vh;width:50px;animation-duration:44s;animation-delay:-23.5s;fill:var(--pc2)}
+.ebird.eb6{top:88vh;width:64px;animation-duration:40s;animation-delay:-14s}
+.ebird.eb7{top:40vh;width:44px;animation-duration:52s;animation-delay:-36s;fill:#FFB703}
+@keyframes ebFly{0%{left:-8vw;transform:translateY(0) scaleY(1);opacity:0}5%{opacity:.95}20%{transform:translateY(-14px) scaleY(.7)}40%{transform:translateY(4px) scaleY(1)}60%{transform:translateY(-10px) scaleY(.75)}80%{transform:translateY(2px) scaleY(1)}95%{opacity:.95}100%{left:106vw;transform:translateY(-6px);opacity:0}}
+/* ақ бұлттар баяу жылжиды */
+.cloud{position:absolute;width:220px;height:70px;border-radius:70px;background:#fff;opacity:.75;filter:blur(1px);box-shadow:60px -26px 0 -6px #fff,120px -6px 0 -14px #fff;animation:clX linear infinite}
+.cloud.c1{top:9vh;animation-duration:90s;animation-delay:-10s}
+.cloud.c2{top:30vh;width:160px;height:50px;opacity:.6;animation-duration:120s;animation-delay:-60s}
+.cloud.c3{top:72vh;width:190px;opacity:.55;animation-duration:105s;animation-delay:-30s}
+.cloud.c4{top:50vh;width:140px;height:44px;opacity:.5;animation-duration:130s;animation-delay:-95s}
+@keyframes clX{from{left:-20vw}to{left:110vw}}
+/* тақырыптағы бөлік белгісінде кішкене жапырақ */
+.hd.hd2 h2 .ph2::before{content:"🍃 "}
+@media (prefers-reduced-motion:reduce){.ebird,.cloud{display:none}.eco-sun .rays{animation:none}}
+/* құстар — алдыңғы қабатта (кішкентай, мәтінге кедергі емес) */
+.eco-birds{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+/* кезең тақырыбының оң жағында — айналатын эко-күн белгісі */
+.hd.hd2::after{content:""!important;display:block!important;position:absolute;right:34px;top:50%;width:112px;height:112px;margin-top:-56px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-60 -60 120 120'%3E%3Cg fill='%23FFC93C'%3E%3Cpath d='M0-58l5 18h-10z'/%3E%3Cpath d='M0-58l5 18h-10z' transform='rotate(30)'/%3E%3Cpath d='M0-58l5 18h-10z' transform='rotate(60)'/%3E%3Cpath d='M0-58l5 18h-10z' transform='rotate(90)'/%3E%3Cpath d='M0-58l5 18h-10z' transform='rotate(120)'/%3E%3Cpath d='M0-58l5 18h-10z' transform='rotate(150)'/%3E%3Cpath d='M0-58l5 18h-10z' transform='rotate(180)'/%3E%3Cpath d='M0-58l5 18h-10z' transform='rotate(210)'/%3E%3Cpath d='M0-58l5 18h-10z' transform='rotate(240)'/%3E%3Cpath d='M0-58l5 18h-10z' transform='rotate(270)'/%3E%3Cpath d='M0-58l5 18h-10z' transform='rotate(300)'/%3E%3Cpath d='M0-58l5 18h-10z' transform='rotate(330)'/%3E%3C/g%3E%3Ccircle r='34' fill='%231E9BF0'/%3E%3Cpath d='M-20-18c10-8 22-4 22 6s-14 8-12 18 14 8 8 18c-14-2-26-14-24-28 1-6 3-10 6-14zM12-26c10 4 18 12 20 22-6 2-14-2-16 4s6 12 2 18-14 2-14-6 4-16 0-24 2-14 8-14z' fill='%237BC63A'/%3E%3Ccircle r='34' fill='none' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E") center/contain no-repeat;
+  animation:sunSpin 40s linear infinite;filter:drop-shadow(0 6px 14px rgba(255,183,3,.55));opacity:1;left:auto;bottom:auto}
+.hd.hd2{padding-right:170px!important}
+/* құстар тек бос «аралықтарда» ұшады — мәтін үстінен өтпейді */
+.ebird.eb1{top:26.4vh!important;width:60px!important}.ebird.eb2{top:27.6vh!important;width:40px!important}.ebird.eb3{top:25.8vh!important;width:34px!important}
+.ebird.eb4{top:40.2vh!important;width:54px!important}.ebird.eb5{top:41.4vh!important;width:38px!important}
+.ebird.eb6{top:93vh!important;width:50px!important}.ebird.eb7{top:92vh!important;width:34px!important}
