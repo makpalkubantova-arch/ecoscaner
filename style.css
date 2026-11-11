@@ -272,3 +272,12 @@ body.ph #stageWrap{display:none}
 
 .facts{gap:10px}.facts div{padding:10px 12px 10px 70px!important;min-height:0}.fi{left:10px;margin-top:-24px}.fi .e3{height:48px}.facts b{font-size:24px}
 .bs{min-height:0;overflow:hidden}.bs .facts div{min-height:0}.bs .facts small{display:none}
+/* Уақыт бітті — жұмсақ хабар жолағы (бетті жаппайды, өзі ауыспайды) */
+#over.overbar{position:fixed;inset:auto 0 96px 0;display:flex;justify-content:center;background:none;backdrop-filter:none;pointer-events:none;z-index:60}
+#over.overbar[hidden]{display:none}
+#over .obar{pointer-events:auto;display:flex;align-items:center;gap:14px;background:#fff;border-radius:22px;padding:12px 14px 12px 18px;box-shadow:0 18px 50px rgba(10,40,60,.28);border:3px solid #FF8A3D;animation:obIn .45s cubic-bezier(.2,1.4,.4,1)}
+#over .obar .ob-ic{font-size:30px;animation:obRing 1s ease-in-out 3}
+#over .obar b{display:block;font-size:18px}#over .obar small{display:block;color:#56707e;font-weight:700}
+#over .obar .btn{padding:10px 16px;font-size:15px}#over .ob-x{border:0;background:#f1f5f9;border-radius:50%;width:32px;height:32px;cursor:pointer}
+@keyframes obIn{from{transform:translateY(40px);opacity:0}}@keyframes obRing{25%{transform:rotate(-14deg)}75%{transform:rotate(14deg)}}
+#allr tr.miss td.mi{color:#B45309;font-weight:800;font-size:.85em}#allr td.mi{color:#0E8F6F;font-size:.85em}

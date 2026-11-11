@@ -8,6 +8,9 @@ const ST = DATA.stages, L = DATA.lesson, PTS = DATA.points, MAXP = Object.values
 const PHONE = ["t6"]; /* телефон тек бекіту квизіне; қалғаны тақтада және парақта, балды хатшы қояды */
 const nrm = n => String(n || "").toLowerCase().trim().replace(/\s+/g, " ").replace(/[әғқңөұүһі]/g, c => ({ "ә": "а", "ғ": "г", "қ": "к", "ң": "н", "ө": "о", "ұ": "у", "ү": "у", "һ": "х", "і": "и" })[c]);
 const GK = Object.keys(DATA.groups), ROLE = { sp1: "🎤 1-спикер", sp2: "🎤 2-спикер", hs: "📒 хатшы", po: "🖼️ постер қорғаушы" };
+/* Сыныптың тұрақты тізімі: бір рет жүктеледі (нұсқа ауысқанда жаңарады) */
+(() => { const RV = "11-2026-11-12a"; try { if (MODE === "b" && Array.isArray(DATA.defaultRoster) && store.get("rosV", "") !== RV) {
+  store.set("roster", DATA.defaultRoster.map(([name, n, role]) => ({ name, lvl: "B", g: GK[n - 1], fixG: GK[n - 1], role: role || "", fixR: role || null }))); store.set("rosV", RV); } } catch (e) {} })();
 /* LIVE.read: хатшы енгізген балдар мен оқушының квизін есім бойынша бір адамға біріктіру */
 { const _r = LIVE.read.bind(LIVE); LIVE.read = async () => { const d = await _r(); const by = {};
   Object.entries(d.students || {}).forEach(([id, v]) => { if (!v || !v.name) return; const k = nrm(v.name), o = by[k] || (by[k] = { ...v, sc: {}, at: {} });
@@ -38,7 +41,10 @@ const me = () => store.get("me", null);
 const scores = () => store.get("sc", {});
 const doneAt = () => store.get("at", {});
 const total = (sc = scores()) => TASKS.reduce((t, k) => t + (sc[k] || 0), 0);
-const mark = t => { const p = Math.round(t / MAXP * 100); const g = DATA.grades.find(g => p >= g.min); return { p, m: Math.max(1, Math.round(p / 10)), lv: g.name, c: g.c }; };
+/* Кездейсоқ таңдалатын тапсырмалар (үй жұмысы, глобус) — оқушы шықпаса, оның максимумына кірмейді: ешкім «шықпағаны үшін» балл жоғалтпайды */
+const OPT = ["hw", "globe"].filter(k => PTS[k]);
+const maxOf = x => MAXP - OPT.filter(k => !(x && ((x.at && x.at[k]) || (x.sc && x.sc[k] != null)))).reduce((t, k) => t + PTS[k], 0);
+const mark = (t, mx = MAXP) => { const p = Math.round(t / Math.max(1, mx) * 100); const g = DATA.grades.find(g => p >= g.min); return { p, m: Math.max(1, Math.round(p / 10)), lv: g.name, c: g.c }; };
 function setScore(k, v, done) { const s = scores(); s[k] = Math.max(0, Math.min(PTS[k], v)); store.set("sc", s); if (done) { const a = doneAt(); a[k] = a[k] || Date.now(); store.set("at", a); } push(); paintMe(); }
 function push() { const m = me(); if (!m || !LIVE.on()) return; LIVE.pushStudent(m.id, { name: m.name, g: m.g, sc: scores(), at: doneAt(), pair: store.get("pair", ""), total: total(), sky: store.get("mySky", null), ts: m.ts || Date.now() }); }
 function paintMe() { const e = $("#phSc"); if (e) e.textContent = `${total()} / ${MAXP}`; }
@@ -244,7 +250,7 @@ function road() {
 }
 let lastL = null;
 function paintTimer() {
-  const tot = Math.max(1, ST[cur].min * 60), l = secOf(cur), f = $("#ringF");
+  const l = secOf(cur), tot = Math.max(1, ST[cur].min * 60, l), f = $("#ringF");
   if (run && ST[cur].min && lastL !== null && l !== lastL) { if (l === 60 && tot > 90) { beep(880, .4); setTimeout(() => beep(1175, .5), 220); toast("⏳ 1 минут қалды!"); } if (l <= 10 && l > 0) beep(l <= 3 ? 1320 : 988, .1); if (l === 0) { [523, 659, 784, 1047].forEach((q, k) => setTimeout(() => beep(q, .5), k * 160)); } }
   lastL = run ? l : null;
   $("#ringT").textContent = ST[cur].min ? `${String(Math.floor(l / 60)).padStart(2, "0")}:${String(l % 60).padStart(2, "0")}` : "—";
@@ -264,21 +270,24 @@ async function newSession() { store.del("gl"); store.del("mood"); store.del("bon
   return n;
 }
 async function startLesson() {
-  clkStart = Date.now(); store.set("clk", clkStart); clkDraw();
-  const n = await newSession(); toast(n ? `⏱ Сабақ басталды! Дайындықтағы ${n} оқушы тазаланды` : "⏱ Сабақ басталды! Сәттілік!");
-  if (ST[cur].id === "invite") go(1, true); else { render(); paintTimer(); }
+  clkStart = Date.now(); store.set("clk", clkStart); paused = false; clkDraw();
+  store.del("gl"); store.del("mood"); ["left", "bonus", "notes", "skyB"].forEach(k => store.del(k)); Object.keys(left).forEach(k => delete left[k]);
+  if (ST[cur].id === "invite") go(1, true); else { render(); setRun(!!ST[cur].min); }
+  toast("⏱ Сабақ басталды! Сәттілік!");
+  newSession().then(n => { if (n) toast(`🧹 Дайындықтағы ${n} жазба тазаланды`); if (LIVE.on()) LIVE.setRoster(store.get("roster", [])).catch(() => {}); });
 }
 $("#clock").onclick = () => { if (clkStart) { if (!confirm("Сабақ сағатын тоқтатамыз ба? Келесі ▶ басылғанда барлық нәтиже тазаланады.")) return; clkStart = null; store.set("clk", null); clkDraw(); return; } startLesson(); };
-function setRun(v) { run = v; clearInterval(tick); if (run && ST[cur].min) tick = setInterval(() => { const id = ST[cur].id; left[id] = Math.max(0, secOf(cur) - 1); store.set("left", left); paintTimer(); if (left[id] === 0) timeUp(); }, 1000); else run = false; paintTimer(); }
+function setRun(v) { if (v && ST[cur].min && secOf(cur) <= 0) v = false; run = v; clearInterval(tick); if (run && ST[cur].min) tick = setInterval(() => { const id = ST[cur].id; left[id] = Math.max(0, secOf(cur) - 1); store.set("left", left); paintTimer(); if (left[id] === 0) timeUp(); }, 1000); else run = false; paintTimer(); }
 function timeUp() {
   setRun(false); if (cur >= ST.length - 1) { toast("Сабақ аяқталды. Рахмет!"); return; }
-  let n = 5; const o = $("#over"); o.hidden = false; const res = $("#resList")?.innerHTML || "";
-  const draw = () => o.innerHTML = `<div class="ob"><div class="lbl">Уақыт бітті</div><b>${n}</b>${res ? `<div class="ob-res">${res}</div>` : ""}<p>Келесі: <strong>${esc(ST[cur + 1].title)}</strong></p><div class="trow c"><button class="btn lt" id="stay">Қалу (+1 мин)</button><button class="btn" id="goNow">Қазір өту →</button></div></div>`;
-  draw(); clearInterval(autoT);
-  autoT = setInterval(() => { n--; if (n <= 0) { clearInterval(autoT); o.hidden = true; go(cur + 1, true); } else draw(); }, 1000);
-  o.onclick = e => { if (e.target.id === "stay") { clearInterval(autoT); o.hidden = true; left[ST[cur].id] = 60; setRun(true); } if (e.target.id === "goNow") { clearInterval(autoT); o.hidden = true; go(cur + 1, true); } };
+  /* Уақыт бітті: беттен ешқайда өзі ауыспайды. Төменде жұмсақ хабар шығады — мұғалім өзі шешеді. */
+  const o = $("#over"); clearInterval(autoT);
+  o.className = "overbar"; o.hidden = false;
+  o.innerHTML = `<div class="obar"><span class="ob-ic">⏰</span><div><b>Кезең уақыты бітті</b><small>Келесі: ${esc(ST[cur + 1].title)}</small></div><button class="btn lt" id="stay">+1 мин</button><button class="btn" id="goNow">Келесіге өту →</button><button class="ob-x" id="obX" title="Жабу">✕</button></div>`;
+  o.onclick = e => { const id = e.target.id; if (id === "stay") { o.hidden = true; left[ST[cur].id] = 60; setRun(true); } else if (id === "goNow") { o.hidden = true; go(cur + 1, true); } else if (id === "obX") o.hidden = true; };
 }
 function go(i, autoRun) {
+  { const o = $("#over"); if (o) o.hidden = true; }
   cur = Math.max(0, Math.min(ST.length - 1, i)); const s = ST[cur];
   history.replaceState(null, "", location.search + "#" + s.id);
   $("#partLbl").textContent = DATA.parts[s.part] + ` · ${cur + 1}/${ST.length}`; $("#stLbl").textContent = s.title;
@@ -286,9 +295,10 @@ function go(i, autoRun) {
   road(); render(); setRun(!!autoRun && !!s.min); paintTimer();
   if (LIVE.on() && s.id !== "invite") LIVE.setStage(s.id).catch(() => {});
 }
-$("#prev").onclick = () => go(cur - 1); $("#next").onclick = () => go(cur + 1, run);
-$("#road").onclick = e => { const b = e.target.closest("[data-go]"); if (b) go(+b.dataset.go); };
-$("#play").onclick = () => setRun(!run);
+let paused = false; const keepRun = () => !!clkStart && !paused;
+$("#prev").onclick = () => go(cur - 1, keepRun()); $("#next").onclick = () => go(cur + 1, keepRun());
+$("#road").onclick = e => { const b = e.target.closest("[data-go]"); if (b) go(+b.dataset.go, keepRun()); };
+$("#play").onclick = () => { paused = run; setRun(!run); };
 $("#fs").onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
 addEventListener("keydown", e => { if (e.target.closest("input,textarea")) return; if (e.key === "ArrowRight" || e.key === "PageDown") $("#next").click(); if (e.key === "ArrowLeft" || e.key === "PageUp") $("#prev").click(); if (e.key === " ") { e.preventDefault(); setRun(!run); } });
 $$("[data-close]").forEach(b => b.onclick = () => b.closest(".modal").hidden = true);
@@ -334,7 +344,7 @@ const R = {
   learn: s => `<div class="st">${HD(s, "Оқулықтағы 25–28-сызбалар · әр қадамда нақты мысал және жедел сұрақ", "ЖАҢА САБАҚ")}<div class="body learn"><div class="lnav" id="lnav">${DATA.learnTabs.map((t, i) => `<button data-l="${i}">${esc(t.t)}</button>`).join("")}</div><div id="lbox" class="lbox"></div></div></div>`,
   t1: s => `<div class="st">${HD(s, "8 көрсеткішті 4 ортаға жікте: А — ауа, С — су, Т — топырақ, Ж — табиғи жүйелер. <b>Үлгі:</b> «PM2.5 · Қарағанды» → <b>А</b>.", modeBadge(s))}<div class="body task">${howStrip("t1")}<div class="card tk" id="tk"></div>${descPanel("t1")}</div></div>`,
   t2: s => `<div class="st">${HD(s, "Жұбыңмен №3 парақта: 3 нормативтің түрін және 3 заттың қауіп класын белгіле. <b>Үлгі:</b> «Озон» → <b>I класс</b> (өте қауіпті).", modeBadge(s))}<div class="body task">${howStrip("t2")}<div class="card tk" id="tk"></div>${descPanel("t2")}</div></div>`,
-  t3: s => `<div class="st">${HD(s, "Топ өз қаласының досьесін оқиды → ватманға жазады: <b>«Біздің қала — … деңгей, себебі СИ = …; басты ластаушы — …; ұсынысымыз — …»</b> → 1 минут қорғайды.", modeBadge(s))}<div class="body t3b">${howStrip("t3")}<div class="ptim"><button data-pt="180" data-l="Постерге дайындық">⏱ 3 мин дайындық</button>${GK.map(g => `<button data-pt="120" data-l="${esc(DATA.groups[g].n)} қорғайды" style="--gc:${DATA.groups[g].c}">🎤 ${DATA.groups[g].i} ${esc(DATA.groups[g].city)} · 2 мин</button>`).join("")}<span class="sptim" id="sptim"></span></div><div class="dos3">${Object.keys(DATA.groups).map(g => { const D = DATA.t3[g], G = DATA.groups[g];
+  t3: s => `<div class="st">${HD(s, "Топ өз қаласының досьесін оқиды → ватманға жазады: <b>«Біздің қала — … деңгей, себебі СИ = …; басты ластаушы — …; ұсынысымыз — …»</b> → 2 минут қорғайды.", modeBadge(s))}<div class="body t3b">${howStrip("t3")}<div class="ptim"><button data-pt="180" data-l="Постерге дайындық">⏱ 3 мин дайындық</button>${GK.map(g => `<button data-pt="120" data-l="${esc(DATA.groups[g].n)} қорғайды" style="--gc:${DATA.groups[g].c}">🎤 ${DATA.groups[g].i} ${esc(DATA.groups[g].city)} · 2 мин</button>`).join("")}<span class="sptim" id="sptim"></span></div><div class="dos3">${Object.keys(DATA.groups).map(g => { const D = DATA.t3[g], G = DATA.groups[g];
       return `<div class="dos" style="--gc:${G.c}"><div class="dos-h">${G.i} <b>${esc(G.n)}</b><span>${esc(D.period)}</span></div><div class="dos-g">${gauge(D.si, D.ez)}<div class="dos-k"><div><small>СИ</small><b>${fmt(D.si)}</b></div><div><small>ЕЖҚ</small><b>${fmt(D.ez)}%</b></div></div></div>${hbars(D.air.slice(0, 4), Math.max(...D.air.map(a => a[1])) * 1.1)}<ul class="dos-f">${D.facts.slice(0, 2).map(f => `<li>${esc(f)}</li>`).join("")}</ul>
       <div class="dos-r" id="gr-${g}"><p class="muted sm">Топтың жауабы күтілуде… 📡</p></div><div class="bon">Қорғау: <button data-bonus="${g}" data-v="1">+1</button><button data-bonus="${g}" data-v="2">+2</button><b id="bo-${g}"></b></div></div>`; }).join("")}</div>
       </div></div>`,
@@ -484,7 +494,14 @@ async function liveTick() {
   clearTimeout(liveT); const id = ST[cur].id;
   let d = {}, fbOk = false; if (LIVE.on()) { try { d = await LIVE.read(); fbOk = true; } catch {} }
   { const c = $("#fbChip"); if (c) { c.className = "fb-chip " + (fbOk ? "ok" : "bad"); $("#fbS").textContent = !LIVE.on() ? "өшірулі" : fbOk ? "қосулы" : "байланыс жоқ"; c.title = fbOk ? "Firebase қосулы: оқушылардың жауаптары тақтаға тірі түседі · бөлме " + LIVE.room : "Firebase-ке қосыла алмады: интернетті тексеріңіз (нәтижелер телефондарда сақталады)"; } }
-  const studs = Object.entries(d.students || {}).map(([k, v]) => ({ id: k, ...v })), grp = d.groups || {};
+  const raw = Object.entries(d.students || {}).map(([k, v]) => ({ id: k, ...v })), grp = d.groups || {};
+  /* Бір оқушының бірнеше жазбасы (хатшы, глобус, телефон) атымен біріктіріледі — ұпайы бөлініп кетпейді */
+  const mg = {}; raw.forEach(x => { const k = nrm(x.name); if (!k) return; const m = mg[k] || (mg[k] = { id: "m_" + k, name: x.name, g: x.g, sc: {}, at: {} });
+    if (!m.g) m.g = x.g; if (x.pair) m.pair = x.pair;
+    Object.entries(x.sc || {}).forEach(([t, v]) => { if (typeof v === "number") m.sc[t] = Math.max(m.sc[t] ?? 0, v); });
+    Object.entries(x.at || {}).forEach(([t, v]) => { if (v) m.at[t] = Math.min(m.at[t] || v, v); }); });
+  const studs = Object.values(mg);
+  const rosAll = [...studs]; (store.get("roster", []) || []).forEach(r => { if (!mg[nrm(r.name)]) rosAll.push({ id: "r_" + nrm(r.name), name: r.name, g: r.g, sc: {}, at: {}, none: true }); });
   const notes = [...Object.values(d.notes || {}), ...store.get("notes", [])].sort((a, b) => b.ts - a.ts);
   const bonus = { ...store.get("bonus", {}) }; Object.entries(grp).forEach(([g, v]) => { if (v && v.bonus != null) bonus[g] = v.bonus; });
   const totOf = x => TASKS.reduce((t, k) => t + (x.sc?.[k] || 0), 0);
@@ -503,14 +520,14 @@ async function liveTick() {
   if (id === "t3") Object.keys(DATA.groups).forEach(g => { const box = $("#gr-" + g); if (!box) return; const sub = grp[g]?.sub; $("#bo-" + g).textContent = bonus[g] ? `+${bonus[g]} ✓` : "";
     if (sub) box.innerHTML = `<div class="sub"><div class="ans">${sub.ans.map((a, i) => `<span class="${a === DATA.t3.qs[i].o[DATA.t3[g].a[i]] ? "ok" : "no"}">${i + 1}) ${esc(a)}</span>`).join("")}</div>${sub.idea ? `<p class="idea">💡 ${esc(sub.idea)}</p>` : ""}<div class="gsc">${sub.ok}/3 ${bonus[g] ? `+ ${bonus[g]}` : ""} · ${esc(sub.by)}</div></div>`; });
   if (id === "sum") {
-    const rows = studs.map(x => ({ ...x, T: totOf(x) })).sort((a, b) => b.T - a.T);
-    const gs = GK.map(k => { const g = DATA.groups[k], m = rows.filter(x => x.g === k), avg = m.length ? m.reduce((t, x) => t + x.T, 0) / m.length : 0; return [g, avg]; }).sort((a, b) => b[1] - a[1]), mx = Math.max(1, ...gs.map(x => x[1]));
+    const rows = rosAll.map(x => ({ ...x, T: totOf(x), MX: maxOf(x) })).sort((a, b) => b.T / b.MX - a.T / a.MX || b.T - a.T);
+    const gs = GK.map(k => { const g = DATA.groups[k], m = rows.filter(x => x.g === k), avg = m.length ? m.reduce((t, x) => t + mark(x.T, x.MX).m, 0) / m.length : 0; return [g, avg]; }).sort((a, b) => b[1] - a[1]), mx = Math.max(1, ...gs.map(x => x[1]));
     $("#gbars").innerHTML = gs.map(([g, v], i) => `<div class="gb"><span>${["🥇", "🥈", "🥉"][i]} ${g.i} ${esc(g.city)}</span><div class="tr"><i style="width:${v / mx * 100}%;background:${g.c}"></i></div><b>${fmt(v)}</b></div>`).join("");
     if (rows.length) {
       const best = (k, f) => rows.filter(x => (x.sc?.[k] || 0) > 0).sort(f || ((a, b) => (b.sc[k] || 0) - (a.sc[k] || 0) || (a.at?.[k] || 9e15) - (b.at?.[k] || 9e15)))[0];
       const M = [["🥇", "1-орын", rows[0]], ["🥈", "2-орын", rows[1]], ["🥉", "3-орын", rows[2]], ["🌍", "Глобус шебері", best("globe")], ["⚡", "Квиз жылдамы", best("t6")], ["🖼️", "Үздік постер", best("t3")]].filter(m => m[2]);
-      $("#meds").innerHTML = M.map(([i, t, x], k) => `<div class="med" style="animation-delay:${k * .15}s"><i>${i}</i><div><small>${t}</small><b>${esc(x.name)}</b><span>${DATA.groups[x.g]?.i || ""} ${x.T ?? totOf(x)}/${MAXP} · ${mark(x.T ?? totOf(x)).m} балл</span></div></div>`).join("");
-      $("#allr").innerHTML = `<table><tr><th>#</th><th>Оқушы</th><th>Топ</th><th>Ұпай</th><th>Балл</th></tr>${rows.map((x, i) => { const m = mark(x.T); return `<tr><td>${i + 1}</td><td>${esc(x.name)}</td><td>${DATA.groups[x.g]?.i || ""}</td><td>${x.T}/${MAXP}</td><td><b style="color:${m.c}">${m.m}</b></td></tr>`; }).join("")}</table>`;
+      $("#meds").innerHTML = M.map(([i, t, x], k) => `<div class="med" style="animation-delay:${k * .15}s"><i>${i}</i><div><small>${t}</small><b>${esc(x.name)}</b><span>${DATA.groups[x.g]?.i || ""} ${x.T}/${x.MX} · ${mark(x.T, x.MX).m} балл</span></div></div>`).join("");
+      $("#allr").innerHTML = `<table><tr><th>#</th><th>Оқушы</th><th>Топ</th><th>Ұпай</th><th>Балл</th><th>Бағаланбаған</th></tr>${rows.map((x, i) => { const m = mark(x.T, x.MX), miss = TASKS.filter(k => !OPT.includes(k) && x.sc?.[k] == null).map(k => ({ speak: "спикер", t4: "ЖИ", t3: "постер", t6: "квиз" })[k] || k); return `<tr class="${miss.length ? "miss" : ""}"><td>${i + 1}</td><td>${esc(x.name)}</td><td>${DATA.groups[x.g]?.i || ""}</td><td>${x.T}/${x.MX}</td><td><b style="color:${m.c}">${m.m}</b></td><td class="mi">${miss.length ? "⚠ " + miss.join(", ") : "✓"}</td></tr>`; }).join("")}</table>`;
     }
   }
   if (id === "feedback") {
@@ -526,12 +543,15 @@ async function liveTick() {
 /* ---------- мұғалім панелі ---------- */
 async function excel() {
   let d = {}; if (LIVE.on()) { try { d = await LIVE.read(); } catch {} }
-  const studs = Object.values(d.students || {}), grp = d.groups || {}; if (!studs.length) { toast("Әзірге нәтиже жоқ"); return; }
+  const grp = d.groups || {}, mg = {}; Object.values(d.students || {}).forEach(x => { const k = nrm(x.name); if (!k) return; const m = mg[k] || (mg[k] = { name: x.name, g: x.g, sc: {}, at: {} }); if (x.pair) m.pair = x.pair;
+    Object.entries(x.sc || {}).forEach(([t, v]) => { if (typeof v === "number") m.sc[t] = Math.max(m.sc[t] ?? 0, v); }); Object.entries(x.at || {}).forEach(([t, v]) => { if (v) m.at[t] = v; }); });
+  (store.get("roster", []) || []).forEach(r => { if (!mg[nrm(r.name)]) mg[nrm(r.name)] = { name: r.name, g: r.g, sc: {}, at: {} }; });
+  const studs = Object.values(mg); if (!studs.length) { toast("Әзірге нәтиже жоқ"); return; }
   const bonus = {}; Object.entries(grp).forEach(([g, v]) => bonus[g] = v?.bonus || 0);
   const q = v => { v = String(v ?? ""); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-  const head = ["№", "Оқушы", "Топ", "Жұбы", ...TASKS.map(k => `${ST.find(x => x.id === k).title.split(" · ")[1] || ST.find(x => x.id === k).title} (${PTS[k]})`), `Барлығы (${MAXP})`, "%", "Балл (1–10)", "Деңгей"];
-  const rows = studs.map(x => { const vals = TASKS.map(k => x.sc?.[k] ?? ""); const T = vals.reduce((a, b) => a + (+b || 0), 0); return [x.name, DATA.groups[x.g]?.n || "", x.pair || "", ...vals, T]; })
-    .sort((a, b) => b[b.length - 1] - a[a.length - 1]).map((r, i) => { const T = r[r.length - 1], m = mark(T); return [i + 1, ...r, m.p, m.m, m.lv]; });
+  const head = ["№", "Оқушы", "Топ", "Жұбы", ...TASKS.map(k => `${ST.find(x => x.id === k).title.split(" · ")[1] || ST.find(x => x.id === k).title} (${PTS[k]})`), `Барлығы / өз максимумы`, "%", "Балл (1–10)", "Деңгей"];
+  const rows = studs.map(x => { const vals = TASKS.map(k => x.sc?.[k] ?? ""); const T = vals.reduce((a, b) => a + (+b || 0), 0); return { r: [x.name, DATA.groups[x.g]?.n || "", x.pair || "", ...vals, `${T}/${maxOf(x)}`], m: mark(T, maxOf(x)) }; })
+    .sort((a, b) => b.m.p - a.m.p).map((o, i) => [i + 1, ...o.r, o.m.p, o.m.m, o.m.lv]);
   const info = [[`География · 11-сынып · «${L.topic}» · ${L.teacher}`], [`Күні: ${new Date().toLocaleDateString("kk-KZ")} · Оқушылар: ${studs.length}`], []];
   const csv = "﻿" + [...info, head, ...rows].map(r => r.map(q).join(";")).join("\r\n");
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = `Ekoskaner_natizheler_${new Date().toISOString().slice(0, 10)}.csv`; document.body.append(a); a.click(); a.remove(); toast("📥 Excel файлы жүктелді");
@@ -601,17 +621,31 @@ function rosterPanel() {
   const LN = { A: "озат", B: "екпінді", C: "қанағат" };
   const lvlOf = w => { w = nrm(w).replace(/[.,;]/g, ""); if (/^(a|а|озат|жогары)$/.test(w)) return "A"; if (/^(b|в|б|екпинди|орта)$/.test(w)) return "B"; if (/^(c|с|канагат|канагаттанарлык|томен)$/.test(w)) return "C"; return null; };
   const balance = list => { const W = { A: 3, B: 2, C: 1 }, gs = GK.map(g => ({ g, n: 0, w: 0 }));
-    ["A", "B", "C"].forEach(L => shuffle(list.filter(x => x.lvl === L)).forEach(x => { const mn = Math.min(...gs.map(q => q.n)); let c = shuffle(gs.filter(q => q.n === mn)); const t = L === "C" ? Math.max(...c.map(q => q.w)) : Math.min(...c.map(q => q.w)); const q = c.find(q => q.w === t); x.g = q.g; q.n++; q.w += W[L]; }));
-    GK.forEach(g => { const m = list.filter(x => x.g === g); m.forEach(x => x.role = ""); const pick = (pr, r) => { const c = m.find(x => !x.role && pr(x)) || m.find(x => !x.role); if (c) c.role = r; };
+    // тұрақты топ (спикер N немесе «N-топ») — өзгермейді
+    list.filter(x => x.fixG).forEach(x => { x.g = x.fixG; const q = gs.find(q => q.g === x.g); q.n++; q.w += W[x.lvl]; });
+    ["A", "B", "C"].forEach(L => shuffle(list.filter(x => x.lvl === L && !x.fixG)).forEach(x => { const mn = Math.min(...gs.map(q => q.n)); let c = shuffle(gs.filter(q => q.n === mn)); const t = L === "C" ? Math.max(...c.map(q => q.w)) : Math.min(...c.map(q => q.w)); const q = c.find(q => q.w === t); x.g = q.g; q.n++; q.w += W[L]; }));
+    GK.forEach(g => { const m = list.filter(x => x.g === g); m.forEach(x => x.role = x.fixR || ""); const has = r => m.some(x => x.role === r); const pick = (pr, r) => { if (has(r)) return; const c = m.find(x => !x.role && pr(x)) || m.find(x => !x.role); if (c) c.role = r; };
       pick(x => x.lvl === "A", "sp1"); pick(x => x.lvl === "B", "sp2"); pick(x => x.lvl === "B", "hs"); pick(x => x.lvl !== "A", "po"); });
     return list; };
   let ros = store.get("roster", []);
+  /* Жол: «Аты [деңгейі] [спикер N | хатшы | постер] [N-топ]». Спикер 1–2 → 1-топ, 3–4 → 2-топ, 5–6 → 3-топ. */
+  const parseRos = txt => { const seen = new Set(); return txt.split("\n").map(l => l.trim().replace(/^\d+[.)]\s*/, "")).filter(Boolean).map(l => {
+      const t = l.split(/[\s,;\t—–-]+/).filter(Boolean), name = [], o = { lvl: "B", fixG: null, fixR: null };
+      for (let j = 0; j < t.length; j++) { const w = nrm(t[j]);
+        if (j > 0 && lvlOf(t[j])) { o.lvl = lvlOf(t[j]); continue; }
+        if (j > 0 && /^спикер/.test(w)) { const n = parseInt(t[j].replace(/\D/g, "") || t[j + 1]); if (n >= 1 && n <= 6) { o.fixG = GK[Math.ceil(n / 2) - 1]; o.fixR = n % 2 ? "sp1" : "sp2"; if (!/\d/.test(t[j])) j++; } continue; }
+        if (j > 0 && /^(хатшы|сарапшы)$/.test(w)) { o.fixR = "hs"; continue; }
+        if (j > 0 && /^постер/.test(w)) { o.fixR = "po"; continue; }
+        if (j > 0 && /^\d(-?топ)?$/.test(w) && GK[+w[0] - 1]) { o.fixG = GK[+w[0] - 1]; continue; }
+        if (j > 0 && w === "топ" && GK[+t[j + 1] - 1]) { o.fixG = GK[+t[++j] - 1]; continue; }
+        name.push(t[j]); }
+      return { name: name.join(" "), ...o }; }).filter(x => x.name && !seen.has(nrm(x.name)) && seen.add(nrm(x.name))); };
   const out = () => `<div class="grp3">${GK.map(g => { const G = DATA.groups[g], m = ros.filter(r => r.g === g); return `<div class="card gcard" style="--gc:${G.c}"><h4>${G.i} ${esc(G.n)} · ${m.length}</h4>${m.map(r => `<div class="rr2" data-n="${esc(r.name)}"><span>${esc(r.name)} ${r.role ? `<b>${ROLE[r.role]}</b>` : ""}</span><em class="lv-${r.lvl}">${LN[r.lvl]}</em></div>`).join("")}</div>`; }).join("")}</div>`;
-  const draw = () => { $("#gearBody").innerHTML = `<p class="muted">Әр жолға: «Аты деңгейі» (озат / екпінді / қанағат). Озаттар топтарға бөлек таратылады, топтардың жалпы деңгейі тең болады. Рөлдер өзі беріледі; оқушының атын басса, рөлі ауысады.</p>
-      <textarea class="inp" id="rosIn" style="min-height:150px;width:100%">${esc(ros.map(r => r.name + " " + LN[r.lvl]).join("\n"))}</textarea>
+  const draw = () => { $("#gearBody").innerHTML = `<p class="muted">Әр жолға бір оқушы: «Аты [озат / екпінді / қанағат] [спикер 1–6 / хатшы / постер] [1-топ]». Спикер 1–2 → 1-топ, 3–4 → 2-топ, 5–6 → 3-топ. Қалғандары деңгейі бойынша тең бөлінеді. Оқушының атын басса, рөлі ауысады.</p>
+      <textarea class="inp" id="rosIn" style="min-height:150px;width:100%">${esc(ros.map(r => r.name + " " + LN[r.lvl] + (r.fixR && r.fixR.startsWith("sp") ? ` спикер ${GK.indexOf(r.g) * 2 + (r.fixR === "sp1" ? 1 : 2)}` : r.fixR === "hs" ? " хатшы" : r.fixR === "po" ? " постер" : "") + (r.fixG && !(r.fixR || "").startsWith("sp") ? ` ${GK.indexOf(r.fixG) + 1}-топ` : "")).join("\n"))}</textarea>
       <div class="trow"><button class="btn" id="rosGo">🎲 Теңдестіріп бөлу</button><span class="muted sm" id="rosMsg"></span></div>${out()}
       <div class="trow" style="align-items:center;gap:16px;margin-top:10px"><div class="qrbox" style="width:150px">${qrSvg(link("h"))}</div><p class="muted sm"><b>📒 Хатшы телефоны</b> — әр топқа біреу. Сканерлеп, тобын таңдайды да, жұмыс парағына қарап балл қояды.</p></div>`;
-    $("#rosGo").onclick = () => { ros = balance($("#rosIn").value.split("\n").map(l => l.trim()).filter(Boolean).map(l => { const t = l.split(/[\s,;\t]+/).filter(Boolean); const i = t.findIndex((w, j) => j > 0 && lvlOf(w)); return { name: (i > 0 ? t.slice(0, i) : t).join(" "), lvl: i > 0 ? lvlOf(t[i]) : "B" }; }).filter(x => x.name)); send(); draw(); };
+    $("#rosGo").onclick = () => { ros = balance(parseRos($("#rosIn").value)); send(); draw(); };
     $$("#gearBody .rr2").forEach(el => el.onclick = () => { const r = ros.find(x => x.name === el.dataset.n); const o = ["", "sp1", "sp2", "hs", "po"]; r.role = o[(o.indexOf(r.role || "") + 1) % 5]; send(); draw(); }); };
   const send = () => { store.set("roster", ros); if (LIVE.on()) LIVE.setRoster(ros).then(() => { const m = $("#rosMsg"); if (m) m.textContent = "✅ Тізім хатшылар мен телефондарға жіберілді"; }).catch(() => {}); };
   draw(); $("#gearModal").hidden = false;
