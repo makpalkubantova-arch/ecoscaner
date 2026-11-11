@@ -62,6 +62,7 @@
   .scirow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.scic{background:rgba(255,255,255,.92);border-radius:99px;padding:4px 12px;display:flex;gap:6px;align-items:center;box-shadow:0 4px 12px rgba(0,40,60,.08);font-size:12px;line-height:1.3;border-top:4px solid #0EA5E9;animation:scIn .5s both}
   .scic .ic{font-size:16px}.scic b{font-size:13px;color:#0B3D3A}.scic div{display:none}.scic.on{outline:3px solid #F59E0B;transform:translateY(-3px)}@keyframes scIn{from{opacity:0;transform:translateY(10px)}}
   body.inviting .shk{bottom:16px}
+  .shk{display:none!important}
   .shk .bub.hide{opacity:0;transform:translateY(10px) scale(.9);pointer-events:none}
   `;
   document.head.append(Object.assign(document.createElement("style"), { textContent: css }));
@@ -155,7 +156,7 @@
   const onStage = () => { const id = (location.hash || "#invite").slice(1);
     if (id === "speak") sciRow();
     if (id === lastId) return; lastId = id; const p = $(".presenter"); if (p) p.remove();
-    if (LINES[id]) say(LINES[id], id); };
+    /* Шоқан гиді алынды: мұғалім өзі сөйлейді */ };
   new MutationObserver(onStage).observe(document.getElementById("main") || document.body, { childList: true });
   setTimeout(onStage, 600);
 
@@ -169,6 +170,5 @@
       <div class="sci"><b>${S.i} Ғалым-кеңесші: ${S.n}</b> (${S.y})<br>${S.f}</div><button class="x" title="Жабу">✕</button>`;
     document.body.append(el); el.querySelector(".x").onclick = () => el.remove();
     document.querySelectorAll(".scic").forEach((c, k) => c.classList.toggle("on", k === i));
-    say(`Ортаға ${S.n} шығады! Оның рөлінде — ${name}, ${G.n}. Тақырыбы: ${DATA.learnTabs[i].t.replace(/^\d+ · /, "")}.`, "sp" + i);
   });
 })();

@@ -46,7 +46,7 @@ h += `<h2>Сабақтың барысы</h2>`;
 DATA.stages.forEach((s, i) => { const c = SC.stages[s.id]; if (!c) return;
   const pc = PC[s.part] || "#00799A";
   h += `<div class="st" style="--pc:${pc}"><div class="h"><div class="n">${i + 1}</div><b>${s.title}</b><span>${s.min ? `${tm}–${tm + s.min} мин` : "—"}</span></div><div class="k">${s.kicker}${SH[s.id] ? " · парақ " + SH[s.id] : ""}</div>
-   <div class="row"><i>🗣 Айтасыз</i><div class="say">${c.say.map(p => `<p>«${p}»</p>`).join("")}</div></div>
+   <div class="row"><i>🗣 Айтасыз</i><div class="say">${c.say.map(p => { const m = p.match(/^\(([^)]*)\)\s*(.*)$/); return m ? `<p><b style="font-style:normal;color:#0E7490">${m[1]}:</b> «${m[2]}»</p>` : `<p>«${p}»</p>`; }).join("")}</div></div>
    <div class="row"><i>🖱 Басасыз</i><div>${c.press}</div></div>
    <div class="row"><i>🧑‍🎓 Оқушылар</i><div class="stu">${c.stu.map((x, k) => `<em>${k + 1}. ${x}</em>`).join("")}</div></div>
    <div class="row"><i>Құрал</i><div class="tl">${c.tools.map(t => `<em class="${t}">${SC.tools[t]}</em>`).join("")}${c.tip ? `<span style="font-size:9pt;color:#7A4A00;font-weight:700">💡 ${c.tip}</span>` : ""}</div></div></div>`;
