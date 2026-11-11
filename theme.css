@@ -112,3 +112,19 @@ body[data-part="0"] .hd:not(.hd2),body[data-part="1"] .hd:not(.hd2){background:l
 .lnav button.on,#lnav [data-sp].on{background:linear-gradient(135deg,var(--pc),var(--pc2))!important;color:#fff!important;outline:none!important;border-color:transparent!important;box-shadow:0 14px 26px -12px var(--pc)!important;transform:translateY(-3px)}
 #lnav [data-sp].on small{color:#fff;opacity:.95}
 .lnav button{transition:transform .2s,box-shadow .2s}.lnav button:hover{transform:translateY(-2px)}
+
+/* ---------- Астананың фотосуреттері: фонда ақырын ауысады (Ken Burns) ---------- */
+.astana-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.astana-bg i{position:absolute;inset:-4%;background:center/cover no-repeat;opacity:0;animation:astSlide 48s linear infinite;filter:saturate(1.25) brightness(1.05)}
+.astana-bg i:nth-child(1){animation-delay:0s}.astana-bg i:nth-child(2){animation-delay:8s}.astana-bg i:nth-child(3){animation-delay:16s}
+.astana-bg i:nth-child(4){animation-delay:24s}.astana-bg i:nth-child(5){animation-delay:32s}.astana-bg i:nth-child(6){animation-delay:40s}
+@keyframes astSlide{0%{opacity:0;transform:scale(1.02) translateX(0)}3%{opacity:1}16.6%{opacity:1}20%{opacity:0;transform:scale(1.12) translateX(-2%)}100%{opacity:0}}
+/* оқуға кедергі болмасын: бөлік түсімен жұмсақ мөлдір қабат */
+.astana-bg::after{content:"";position:absolute;inset:0;background:
+  linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.50) 45%,rgba(255,255,255,.38) 100%),
+  linear-gradient(120deg,color-mix(in srgb,var(--pc2) 35%,transparent),color-mix(in srgb,var(--pc) 25%,transparent));transition:background 1s}
+body .aurora,body[data-part] .aurora{opacity:.55}
+body::after,body[data-part]::after{opacity:.0!important}
+.card,.stu,.hd.hd2{backdrop-filter:blur(2px)}
+.stu{background:linear-gradient(90deg,rgba(255,255,255,.96),color-mix(in srgb,var(--pc2) 10%,rgba(255,255,255,.94)))}
+@media (prefers-reduced-motion:reduce){.astana-bg i{animation:none}.astana-bg i:first-child{opacity:1}}
