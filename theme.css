@@ -177,3 +177,4 @@ body::after,body[data-part]::after{opacity:.0!important}
 .ai4-rl{margin-top:8px;padding:8px 10px;border-radius:12px;background:linear-gradient(135deg,#E9FBF5,#E7F4FF);font-size:15px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
 .ai4-rl .rule{font:900 19px var(--d);color:var(--ink)}
 .ai4-q button{padding:4px 10px!important;min-height:0!important}.ai4-q [data-qs]>*{padding:4px 10px!important}
+.keyc.lock{background:#FFF7E6;border:2px dashed #F5B700}
