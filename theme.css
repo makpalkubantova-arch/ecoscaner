@@ -186,3 +186,4 @@ body::after,body[data-part]::after{opacity:.0!important}
 .wgr li.qq{color:#B6C4CF;font-weight:800;letter-spacing:.2em}
 .wgr li.pop{animation:popIn .45s cubic-bezier(.2,1.6,.4,1) both}
 @keyframes popIn{from{transform:scale(.3) translateY(-20px);opacity:0}}
+.inv .muted.sm.c,.body.inv p.muted{background:rgba(255,255,255,.9);border-radius:12px;padding:6px 12px;color:#33506B!important}

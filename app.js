@@ -257,6 +257,9 @@ addEventListener("resize", fit); fit();
 let cur = Math.max(0, ST.findIndex(s => s.id === location.hash.slice(1)));
 const left = store.get("left", {}); let run = false, tick = null, autoT = null;
 let clkStart = store.get("clk", null);
+/* Жаңа сабақ күні: 3 сағаттан ескі сағат пен сынақ нәтижелері өзі тазаланады — «қосылды» 0-ден басталады */
+const FRESH = 3 * 3600e3; if (clkStart && Date.now() - clkStart > FRESH) { clkStart = null; store.set("clk", null); }
+function autoClean() { if (MODE !== "b") return; const c = store.get("clr", 0); if (Date.now() - c > FRESH) { store.set("clr", Date.now()); newSession().then(n => { if (n) toast(`🧹 Ескі ${n} жазба тазаланды — оқушылар 0-ден қосылады`); if (LIVE.on()) LIVE.setRoster(store.get("roster", [])).catch(() => {}); }); } }
 const secOf = i => left[ST[i].id] ?? ST[i].min * 60;
 
 function road() {
@@ -287,9 +290,11 @@ async function newSession() { store.del("gl"); store.del("mood"); store.del("bon
 async function startLesson() {
   clkStart = Date.now(); store.set("clk", clkStart); paused = false; clkDraw();
   store.del("gl"); store.del("mood"); store.del("grpShown"); ["left", "bonus", "notes", "skyB"].forEach(k => store.del(k)); Object.keys(left).forEach(k => delete left[k]);
+  const fresh = Date.now() - store.get("clr", 0) < FRESH; /* шақырту бетінде тазаланған болса — ертерек қосылған оқушылар сақталады */
   if (ST[cur].id === "invite") go(1, true); else { render(); setRun(!!ST[cur].min); }
   toast("⏱ Сабақ басталды! Сәттілік!");
-  newSession().then(n => { if (n) toast(`🧹 Дайындықтағы ${n} жазба тазаланды`); if (LIVE.on()) LIVE.setRoster(store.get("roster", [])).catch(() => {}); });
+  if (!fresh) { store.set("clr", Date.now()); newSession().then(n => { if (n) toast(`🧹 Дайындықтағы ${n} жазба тазаланды`); if (LIVE.on()) LIVE.setRoster(store.get("roster", [])).catch(() => {}); }); }
+  else if (LIVE.on()) LIVE.setRoster(store.get("roster", [])).catch(() => {});
 }
 $("#clock").onclick = () => { if (clkStart) { if (!confirm("Сабақ сағатын тоқтатамыз ба? Келесі ▶ басылғанда барлық нәтиже тазаланады.")) return; clkStart = null; store.set("clk", null); clkDraw(); return; } startLesson(); };
 function setRun(v) { if (v && ST[cur].min && secOf(cur) <= 0) v = false; run = v; clearInterval(tick); if (run && ST[cur].min) tick = setInterval(() => { const id = ST[cur].id; left[id] = Math.max(0, secOf(cur) - 1); store.set("left", left); paintTimer(); if (left[id] === 0) timeUp(); }, 1000); else run = false; paintTimer(); }
@@ -338,7 +343,7 @@ const R = {
       <div class="inv-grid"><div><i>📅</i><b>${L.date}</b><small>${L.day}</small></div><div><i>⏱️</i><b>${L.time}</b><small>45 минут</small></div><div><i>🏫</i><b>${L.room}</b><small>${L.cls}</small></div><div><i>📖</i><b>География</b><small>${esc(L.para)}</small></div></div>
       <p class="inv-t">Пән мұғалімі: <b>${esc(L.teacher)}</b><br>${esc(L.school)}</p></div></div>
       <div class="inv-side"><div class="card fcol c"><div class="lbl">Қонақтарға · кері байланыс</div><div class="qrbox">${qrSvg(link("g"))}</div><p class="muted sm">Сабақ соңында пікіріңізді осы QR арқылы қалдырыңыз</p></div>
-      <button class="btn big go" id="startBtn">▶ Сабақты бастау</button><p class="muted sm c">Басқанда 45 минуттық сағат іске қосылады, дайындық нәтижелері тазаланады</p></div></div></div>`,
+      <button class="btn big go" id="startBtn">▶ Сабақты бастау</button><p class="muted sm c">Басқанда 45 минуттық сағат іске қосылады. Шақырту бетінде қосылған оқушылар сақталады.</p><button class="btn lt" id="cleanBtn" style="margin:8px auto 0;display:flex;height:38px;font-size:14px">🧹 Сынақ нәтижелерін тазалау · 0-ден бастау</button></div></div></div>`,
   welcome: s => { const ros = store.get("roster", []); const MOOD = [["☀️", "Шуақты"], ["🌤️", "Ашық"], ["⛅", "Бұлтты"], ["🌧️", "Жаңбырлы"]], mc = store.get("mood", [0, 0, 0, 0]);
     return `<div class="st">${HD(s, "Құрметті қонақтар, жас сарапшылар! Бүгін біз қоршаған ортаның «анализін» оқимыз. Алдымен — сыныптың «ауа райы».")}<div class="body wel3">
       <div class="card mood"><h3>🌦️ Бүгінгі көңіл-күйің — қандай ауа райы?</h3><p class="muted">Әр оқушы бір сөзбен айтады, мұғалім басып санайды. Соңында: «Сабақ соңында бәріміздің аспанымыз ашық болсын!»</p><div class="moodb">${MOOD.map(([i, t], k) => `<button data-md="${k}"><i>${i}</i><span>${t}</span><b>${mc[k] || 0}</b></button>`).join("")}</div></div>
@@ -423,7 +428,8 @@ function drawGroups() {
 function render() {
   const s = ST[cur]; document.body.dataset.part = s.part; $("#main").innerHTML = R[s.id](s); seen.clear(); setTimeout(fitStage, 60); setTimeout(fitStage, 700);
   if (!$("#main .stu") && s.id !== "invite") { const hd = $("#main .hd"), sb = stuBar(s.id); if (sb) { if (hd) hd.insertAdjacentHTML("afterend", sb); else $("#main").insertAdjacentHTML("afterbegin", sb); } }
-  if (s.id === "invite") $("#startBtn").onclick = () => clkStart ? go(1, true) : startLesson();
+  if (s.id === "invite") { $("#startBtn").onclick = () => clkStart ? go(1, true) : startLesson(); autoClean();
+    const cb = $("#cleanBtn"); if (cb) cb.onclick = async () => { if (!confirm("Барлық сынақ нәтижелері мен қосылған оқушылар өшіріледі. Санауыш 0-ден басталады. Жалғастырамыз ба?")) return; store.set("clr", Date.now()); const n = await newSession(); if (LIVE.on()) LIVE.setRoster(store.get("roster", [])).catch(() => {}); toast(n ? `🧹 ${n} жазба өшірілді — енді 0-ден` : "🧹 Тазаланды — енді 0-ден"); }; }
   if (s.id === "speak") { $("#lnav").onclick = e => { const b = e.target.closest("[data-sp]"); if (!b) return; const i = +b.dataset.sp; learn(i); spkNow(i, b); spkTimer(60, b.querySelector("small").textContent); $$("#lnav [data-sp]").forEach(x => x.classList.toggle("on", x === b)); }; learn(0); }
   if (s.id === "learn") { learn(lt); $("#lnav").onclick = e => { const b = e.target.closest("[data-l]"); if (b) learn(+b.dataset.l); }; }
   if (TASK[s.id] && $("#tk")) TASK[s.id]($("#tk"));
