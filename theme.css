@@ -134,3 +134,16 @@ body::after,body[data-part]::after{opacity:.0!important}
   linear-gradient(180deg,rgba(255,255,255,.30) 0%,rgba(255,255,255,.16) 50%,rgba(255,255,255,.10) 100%),
   linear-gradient(120deg,color-mix(in srgb,var(--pc2) 22%,transparent),color-mix(in srgb,var(--pc) 14%,transparent))!important}
 .foot-c{background:rgba(255,255,255,.85);border-radius:16px;padding:4px 18px;flex:0 1 auto;margin:0 auto;box-shadow:0 10px 24px -16px rgba(10,37,64,.6)}
+
+/* ---------- спикер / постер таймері — анық белгі ---------- */
+#sptim.tbadge{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:10px;padding:8px 16px 10px;border-radius:16px;background:#fff;color:var(--ink);box-shadow:0 12px 26px -14px rgba(10,37,64,.6),inset 0 0 0 2px color-mix(in srgb,var(--pc2) 50%,#fff);font:800 16px var(--d)}
+#sptim.tbadge i{font-style:normal;font-size:20px}#sptim.tbadge span{max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sptim.tbadge b{font:900 26px var(--d);color:var(--pc);min-width:62px;text-align:right}
+#sptim.tbadge em{position:absolute;left:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--pc),var(--pc2));transition:width 1s linear}
+#sptim.tbadge.warn b{color:var(--sun2)}#sptim.tbadge.warn em{background:var(--sun2)}
+#sptim.tbadge.end{box-shadow:0 0 0 3px var(--red),0 12px 26px -14px rgba(10,37,64,.6);animation:tPulse 1s ease-in-out infinite}#sptim.tbadge.end b{color:var(--red)}#sptim.tbadge.end em{background:var(--red)}
+@keyframes tPulse{50%{transform:scale(1.04)}}
+/* фото үстіндегі мәтін оқылсын: ақпарат панельдері ақ тақтада */
+#lbox,.lpane,.lfoot{background:rgba(255,255,255,.9);border-radius:22px}
+#lbox{padding:10px;box-shadow:0 22px 46px -32px rgba(10,37,64,.55)}
+.body>.trow,.body .trow:not(.c){background:rgba(255,255,255,.88);border-radius:18px;padding:8px 10px}
