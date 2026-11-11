@@ -178,3 +178,11 @@ body::after,body[data-part]::after{opacity:.0!important}
 .ai4-rl .rule{font:900 19px var(--d);color:var(--ink)}
 .ai4-q button{padding:4px 10px!important;min-height:0!important}.ai4-q [data-qs]>*{padding:4px 10px!important}
 .keyc.lock{background:#FFF7E6;border:2px dashed #F5B700}
+/* топқа бөлу барабаны */
+.card h3 .sm-b{height:36px;padding:0 14px;font-size:14px;margin-left:10px;vertical-align:middle}
+.draw-drum{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 0 10px;padding:10px;border-radius:16px;background:#fff;box-shadow:0 0 0 3px var(--gc,#94A3B8),0 14px 28px -16px var(--gc,#94A3B8);transition:box-shadow .2s}
+.draw-drum span{font-size:30px;animation:spinD .6s linear infinite}.draw-drum b{font:900 30px var(--d);min-width:220px;text-align:center;color:var(--ink)}
+@keyframes spinD{to{transform:rotate(360deg)}}
+.wgr li.qq{color:#B6C4CF;font-weight:800;letter-spacing:.2em}
+.wgr li.pop{animation:popIn .45s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes popIn{from{transform:scale(.3) translateY(-20px);opacity:0}}

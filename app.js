@@ -286,7 +286,7 @@ async function newSession() { store.del("gl"); store.del("mood"); store.del("bon
 }
 async function startLesson() {
   clkStart = Date.now(); store.set("clk", clkStart); paused = false; clkDraw();
-  store.del("gl"); store.del("mood"); ["left", "bonus", "notes", "skyB"].forEach(k => store.del(k)); Object.keys(left).forEach(k => delete left[k]);
+  store.del("gl"); store.del("mood"); store.del("grpShown"); ["left", "bonus", "notes", "skyB"].forEach(k => store.del(k)); Object.keys(left).forEach(k => delete left[k]);
   if (ST[cur].id === "invite") go(1, true); else { render(); setRun(!!ST[cur].min); }
   toast("⏱ Сабақ басталды! Сәттілік!");
   newSession().then(n => { if (n) toast(`🧹 Дайындықтағы ${n} жазба тазаланды`); if (LIVE.on()) LIVE.setRoster(store.get("roster", [])).catch(() => {}); });
@@ -342,7 +342,7 @@ const R = {
   welcome: s => { const ros = store.get("roster", []); const MOOD = [["☀️", "Шуақты"], ["🌤️", "Ашық"], ["⛅", "Бұлтты"], ["🌧️", "Жаңбырлы"]], mc = store.get("mood", [0, 0, 0, 0]);
     return `<div class="st">${HD(s, "Құрметті қонақтар, жас сарапшылар! Бүгін біз қоршаған ортаның «анализін» оқимыз. Алдымен — сыныптың «ауа райы».")}<div class="body wel3">
       <div class="card mood"><h3>🌦️ Бүгінгі көңіл-күйің — қандай ауа райы?</h3><p class="muted">Әр оқушы бір сөзбен айтады, мұғалім басып санайды. Соңында: «Сабақ соңында бәріміздің аспанымыз ашық болсын!»</p><div class="moodb">${MOOD.map(([i, t], k) => `<button data-md="${k}"><i>${i}</i><span>${t}</span><b>${mc[k] || 0}</b></button>`).join("")}</div></div>
-      <div class="card"><h3>👥 Топтар мен рөлдер</h3><div class="wgr">${GK.map(g => { const G = DATA.groups[g], m = ros.filter(r => r.g === g); return `<div style="--gc:${G.c}"><b>${G.i} ${esc(G.n)}</b>${m.length ? `<ol>${m.map(r => `<li>${esc(r.name)}${r.role ? ` <em>${ROLE[r.role]}</em>` : ""}</li>`).join("")}</ol>` : `<p class="muted sm">⚙ → «Топтарды теңдестіру»</p>`}</div>`; }).join("")}</div><div class="wqr"><div class="qrbox s">${qrSvg(link("h"))}</div><small>📒 Хатшыларға: сканерлеп, тобыңды таңда</small></div></div></div></div>`; },
+      <div class="card"><h3>👥 Топтар мен рөлдер ${ros.length ? `<button class="btn sm-b" id="drawBtn">${store.get("grpShown", false) ? "🎲 Қайта бөлу" : "🎲 Топтарға бөлу"}</button>` : ""}</h3><div class="draw-drum" id="drum" hidden><span>🎲</span><b id="drumN">…</b></div><div class="wgr" id="wgr">${GK.map(g => { const G = DATA.groups[g], m = ros.filter(r => r.g === g), shown = store.get("grpShown", false); return `<div style="--gc:${G.c}" data-wg="${g}"><b>${G.i} ${esc(G.n)}</b>${m.length ? `<ol>${shown ? m.map(r => `<li>${esc(r.name)}${r.role ? ` <em>${ROLE[r.role]}</em>` : ""}</li>`).join("") : m.map(() => `<li class="qq">?</li>`).join("")}</ol>` : `<p class="muted sm">⚙ → «Топтарды теңдестіру»</p>`}</div>`; }).join("")}</div><div class="wqr"><div class="qrbox s">${qrSvg(link("h"))}</div><small>📒 Хатшыларға: сканерлеп, тобыңды таңда</small></div></div></div></div>`; },
   goals: s => `<div class="st">${HD(s, `Оқу мақсаты: <b>${esc(L.goal)}</b>`)}<div class="body cols2"><div class="card"><h3>🎯 Бағалау критерийлері</h3><div class="crit">${DATA.criteria.map(([k, d, t]) => `<div><b>${k}</b><span>${esc(d)}<small> · ${t}</small></span></div>`).join("")}</div></div>
     <div class="card"><h3>📈 Күтілетін нәтиже</h3><div class="tiers">${DATA.tiers.map(([a, b], i) => `<div style="animation-delay:${.3 + i * .15}s"><b>${a}:</b> ${esc(b)}</div>`).join("")}</div><p class="muted sm" style="margin-top:14px">Оқулық (89–94-б.) + Қазгидромет 2026 бюллетендерінің нақты деректері. Феноменге негізделген оқыту: жергілікті (Астана, Қарағанды обл.) деректер арқылы жалпы заңдылықты түсінеміз.</p></div></div></div>`,
   rules: s => `<div class="st">${HD(s, "Сарапшылар кодексі")}<div class="body rules">${DATA.rules.map(([i, t, d], k) => `<div class="card rule" data-n="${k + 1}" style="animation-delay:${k * .1}s"><div class="ic">${i}</div><h4>${esc(t)}</h4><p>${esc(d)}</p></div>`).join("")}</div></div>`,
@@ -405,6 +405,21 @@ function fitStage() { const m = $("#main"), st = $("#main .st"); if (!m || !st) 
   if (need > H + 2) st.style.zoom = Math.max(.72, H / need).toFixed(3); }
 addEventListener("resize", () => setTimeout(fitStage, 50));
 let fitT = 0; if (MODE === "b") new MutationObserver(() => { clearTimeout(fitT); fitT = setTimeout(fitStage, 120); }).observe(document.getElementById("main"), { childList: true, subtree: true });
+/* «Кездейсоқ» бөлу көрінісі: барабан айналады, бірақ әр оқушы өзінің тұрақты тобына (рөлімен) түседі */
+function drawGroups() {
+  const ros = store.get("roster", []); if (!ros.length) return; const btn = $("#drawBtn"); btn.disabled = true;
+  const drum = $("#drum"), dn = $("#drumN"); drum.hidden = false;
+  $$("#wgr ol").forEach(o => o.innerHTML = "");
+  const per = GK.map(g => ros.filter(r => r.g === g)), order = []; for (let i = 0; i < Math.max(...per.map(x => x.length)); i++) per.forEach(m => m[i] && order.push(m[i]));
+  const names = ros.map(r => r.name); let k = 0;
+  const step = () => { if (k >= order.length) { drum.hidden = true; store.set("grpShown", true); btn.disabled = false; btn.textContent = "🎲 Қайта бөлу"; beep(1047, .3); toast("✅ Топтар бөлінді!"); return; }
+    const r = order[k], G = DATA.groups[r.g]; let n = 0; drum.style.setProperty("--gc", "#94A3B8");
+    const spin = setInterval(() => { dn.textContent = names[Math.floor(Math.random() * names.length)]; beep(420 + (n++ % 6) * 60, .03); }, 60);
+    setTimeout(() => { clearInterval(spin); dn.textContent = r.name; drum.style.setProperty("--gc", G.c); beep(880, .12);
+      const ol = $(`#wgr [data-wg="${r.g}"] ol`); if (ol) ol.insertAdjacentHTML("beforeend", `<li class="pop">${esc(r.name)}${r.role ? ` <em>${ROLE[r.role]}</em>` : ""}</li>`);
+      k++; setTimeout(step, 260); }, 520); };
+  step();
+}
 function render() {
   const s = ST[cur]; document.body.dataset.part = s.part; $("#main").innerHTML = R[s.id](s); seen.clear(); setTimeout(fitStage, 60); setTimeout(fitStage, 700);
   if (!$("#main .stu") && s.id !== "invite") { const hd = $("#main .hd"), sb = stuBar(s.id); if (sb) { if (hd) hd.insertAdjacentHTML("afterend", sb); else $("#main").insertAdjacentHTML("afterbegin", sb); } }
@@ -415,6 +430,7 @@ function render() {
   if (s.id === "t3") $$("[data-pt]").forEach(b => b.onclick = () => spkTimer(+b.dataset.pt, b.dataset.l));
   if (s.id === "globe") globeInit();
   if (s.id === "video") { const rv = () => { $("#goalBtn").hidden = true; $(".goalin").hidden = false; }; $("#goalBtn").onclick = rv; const v = $("#vd"); if (v) v.onended = rv; }
+  if (s.id === "welcome" && $("#drawBtn")) $("#drawBtn").onclick = drawGroups;
   if (s.id === "welcome") $$("[data-md]").forEach(b => b.onclick = () => { const m = store.get("mood", [0, 0, 0, 0]); m[+b.dataset.md]++; store.set("mood", m); $("b", b).textContent = m[+b.dataset.md]; beep(700, .08); });
   if (s.id === "t3") $$("[data-bonus]").forEach(b => b.onclick = async () => { const g = b.dataset.bonus, bo = store.get("bonus", {}); bo[g] = +b.dataset.v; store.set("bonus", bo); if (LIVE.on()) try { await LIVE.pushGroup(g + "/bonus", bo[g]); } catch {} toast(`${DATA.groups[g].n}: қорғау +${bo[g]}`); liveTick(); });
   if (s.id === "feedback") { $("#wtabs").onclick = e => { const b = e.target.closest("[data-w]"); if (b) { wtab = b.dataset.w; $$("#wtabs button").forEach(x => x.classList.toggle("on", x === b)); liveTick(); } }; }
