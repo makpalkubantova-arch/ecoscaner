@@ -623,7 +623,7 @@ function KEYOF(k, g) { const LT = { air: "А", water: "С", soil: "Т", eco: "Ж
   return ""; }
 function secretary() {
   const ph = $("#phone"), KEYS = TASKS.filter(k => !PHONE.includes(k) && k !== "globe");
-  let ros = store.get("roster", []), g = store.get("secG", null), tab = KEYS[0], msg = "", sc = store.get("secSc", {});
+  let ros = store.get("roster", []); if (!ros.length && Array.isArray(DATA.defaultRoster)) ros = DATA.defaultRoster.map(([name, n, role]) => ({ name, g: GK[n - 1], role: role || "" })); let g = (() => { const q = new URLSearchParams(location.search).get("g"); if (q && DATA.groups[q]) store.set("secG", q); return store.get("secG", null); })(), tab = KEYS[0], msg = "", sc = store.get("secSc", {});
   const keyOpen = () => store.get("secKey", {}); /* кілт әр тапсырмада хатшы өзі орындағаннан кейін ғана ашылады */
   const extra = () => store.get("secExtra", []);
   const sid = n => "r_" + Array.from(nrm(n)).map(c => c.charCodeAt(0).toString(36)).join("").slice(0, 60);
@@ -634,7 +634,7 @@ function secretary() {
   function draw() {
     const st = ST.find(x => x.id === tab), D = DATA.desc[tab], mx = PTS[tab];
     let h = `<div class="ph-top"><span class="case-no sm">ЭКО<br>СКАН</span><span class="me">📒 Хатшы</span></div><div class="ph-h"><small>Парақты кілтпен тексер → балл бас</small><h2>${g ? DATA.groups[g].i + " " + esc(DATA.groups[g].n) : "Тобыңды таңда"}</h2></div>
-      <div class="gpick sec-g">${GK.map(k => `<button data-g="${k}" class="${g === k ? "on" : ""}">${DATA.groups[k].i} ${esc(DATA.groups[k].city)}</button>`).join("")}</div>`;
+      ${g ? `<div class="card sm" style="background:#E8F6FB">⚡ Квиз, глобус және тақтадағы тапсырмалар балы өзі түседі. Сен тек жұмыс парағындағы тапсырмаларға балл қоясың — тек өз тобыңа.</div>` : `<div class="gpick sec-g">${GK.map(k => `<button data-g="${k}">${DATA.groups[k].i} ${esc(DATA.groups[k].city)}</button>`).join("")}</div><p class="follow">Тек өз тобыңды таңда 👆 Кейін ауыстырылмайды.</p>`}`;
     if (g) { h += `<div class="sec-tabs">${KEYS.map(k => `<button data-k="${k}" class="${k === tab ? "on" : ""}">${esc((ST.find(x => x.id === k).title.split(" · ")[1] || ST.find(x => x.id === k).title).replace(/[«»]/g, ""))} · ${PTS[k]}</button>`).join("")}</div>
       <div class="card sm" style="margin-top:8px"><b>${esc(st.title)}</b> · ${mx} балл<br>${D.map(([d, p]) => `• ${esc(d)} — ${p}`).join("<br>")}</div>${keyOpen()[tab] ? `<div class="card sm keyc">🔑 <b>Жауап кілті:</b> ${esc(KEYOF(tab, g))}</div>` : `<div class="card sm keyc lock">🔒 <b>Жауап кілті жабық.</b> Алдымен тапсырманы <b>өзің орында</b>, сосын ашасың.<button class="btn" data-key="1" style="margin-top:8px;width:100%">✅ Мен өзім орындадым — кілтті аш</button></div>`}`;
       const M = mem(); if (st.mode === "Топпен" && M.length) h += `<div class="sec-all">Бүкіл топқа: ${Array.from({ length: mx + 1 }, (_, v) => `<button data-all="${v}">${v}</button>`).join("")}</div>`;
@@ -642,11 +642,13 @@ function secretary() {
       M.forEach((p, i) => { const v = sc[nrm(p.name)] || {}, tot = KEYS.reduce((t, k) => t + (v[k] || 0), 0);
         h += `<div class="card sec-m"><div class="sec-h"><span>${p.role ? ROLE[p.role].split(" ")[0] + " " : ""}${esc(p.name)}</span><span>${tot}/${KEYS.reduce((t, k) => t + PTS[k], 0)}</span></div><div class="sec-ch">${Array.from({ length: mx + 1 }, (_, x) => `<button data-i="${i}" data-v="${x}" class="${v[tab] === x ? "on" : ""}">${x}</button>`).join("")}</div></div>`; });
       h += `<div class="trow"><input class="inp" id="nn" placeholder="Оқушы қосу (аты)"><button class="btn" id="nb">+</button></div>${msg ? `<p class="follow">${esc(msg)}</p>` : ""}`; }
+    ph.classList.toggle("sec-lk", !!g && !keyOpen()[tab]);
     ph.innerHTML = h;
     ph.onclick = e => { const b = e.target.closest("button"); if (!b) return;
       if (b.dataset.key) { if (!confirm("Тапсырманы өзің орындап болдың ба? Кілт ашылғаннан кейін жауабыңды өзгертпе.")) return; const k = keyOpen(); k[tab] = Date.now(); store.set("secKey", k); draw(); return; }
-      if (b.dataset.g) { g = b.dataset.g; store.set("secG", g); draw(); }
+      if (b.dataset.g) { if (g) return; if (!confirm(DATA.groups[b.dataset.g].n + " — сенің тобың ба? Кейін ауыстырылмайды.")) return; g = b.dataset.g; store.set("secG", g); draw(); }
       else if (b.dataset.k) { tab = b.dataset.k; draw(); }
+      else if ((b.dataset.all != null || b.dataset.i != null) && !keyOpen()[tab]) { alert("Алдымен тапсырманы орындап, кілтті аш 🔑"); }
       else if (b.dataset.all != null) { mem().forEach(p => { const k = nrm(p.name); sc[k] = { ...sc[k], [tab]: +b.dataset.all }; save(p.name); }); store.set("secSc", sc); draw(); }
       else if (b.dataset.i != null) { const p = mem()[+b.dataset.i]; const k = nrm(p.name); sc[k] = { ...sc[k], [tab]: +b.dataset.v }; store.set("secSc", sc); save(p.name); draw(); }
       else if (b.id === "nb") { const n = $("#nn").value.trim(); if (n.length < 2) return; store.set("secExtra", [...extra(), { name: n, g }]); draw(); } };
