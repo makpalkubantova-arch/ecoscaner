@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="kk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Қонақтар залы · Экосканер</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,Arial,sans-serif;color:#143b37;background:radial-gradient(circle at 12% 5%,#d4f6ec,transparent 43%),radial-gradient(circle at 89% 22%,#dceefa,transparent 45%),linear-gradient(155deg,#edf8f5,#e9f0f4)}
+header{padding:18px max(18px,calc((100vw - 1060px)/2));border-bottom:1px solid #d5e8e3;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#ffffffbd}
+.brand{font:800 21px Montserrat,sans-serif}.brand span{color:#19a182}.badge{background:#e4f5ee;border:1px solid #aedccd;color:#166b53;border-radius:40px;padding:9px 14px;font-weight:800;font-size:12px;white-space:nowrap}
+main{max-width:1060px;margin:auto;padding:42px 20px 80px}.eyebrow{font:800 12px Inter,sans-serif;letter-spacing:.15em;text-transform:uppercase;color:#178f76}
+h1{font:800 clamp(30px,5vw,57px)/1.13 Montserrat,sans-serif;letter-spacing:-1.2px;margin:18px 0}h1 span{color:#178e7c}
+.sub{max-width:830px;color:#53746e;line-height:1.75;font-size:16px}.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.8fr);gap:18px;margin-top:30px}
+.panel{background:#ffffffed;border:1px solid #ffffff;box-shadow:0 20px 55px #15564d13;border-radius:24px;padding:26px}
+.status{display:inline-flex;align-items:center;gap:9px;border-radius:40px;background:#e8f8f0;padding:9px 13px;font-weight:800;font-size:12px;color:#136d52}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#29aa7e;box-shadow:0 0 0 5px #c8edde}
+h2{font:800 clamp(23px,3vw,33px)/1.2 Montserrat,sans-serif;margin:18px 0 9px}.progress{font-size:14px;font-weight:800;color:#158f75}
+.description{font-size:16px;line-height:1.7;color:#4c6b66}.facts{display:grid;gap:11px;margin-top:21px}.fact{background:#f0f8f5;border-radius:14px;padding:16px}.fact b{display:block;color:#528074;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}.fact span{font-size:15px;font-weight:600;line-height:1.5}
+.side{display:grid;gap:14px}.side h3{font:800 19px Montserrat,sans-serif;margin:0}.sidebox{background:#f0f8f5;padding:15px;border-radius:14px}.sidebox b{display:block;color:#578077;font-size:12px;margin-bottom:5px}.sidebox span{font-weight:700;line-height:1.5}
+a.btn{display:block;text-decoration:none;text-align:center;padding:14px 16px;background:linear-gradient(120deg,#087967,#25a78c);color:#fff;border-radius:13px;font-weight:800}a.other{background:#fff;color:#207d6d;border:1px solid #cde2dd}
+.note{font-size:12px;line-height:1.7;color:#6a8680}footer{max-width:1060px;margin:auto;padding:0 20px 24px;color:#66857c;font-size:12px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.panel{padding:20px}main{padding:30px 17px 50px}.brand{font-size:16px}.badge{font-size:11px;padding:8px}}
+</style></head><body>
+<header><div class="brand">🌿 ЭКО<span>СКАНЕР</span> · Қонақтар</div><div class="badge">👁️ ТЕК КӨРУ</div></header>
+<main>
+<div class="eyebrow">География · 11-сынып · Ашық сабақ</div>
+<h1>Қоршаған ортаның <span>сапасы</span></h1>
+<p class="sub">Құрметті қонақтар! Мұғалім жүргізіп жатқан сабақ кезеңін осы жерден мәтін түрінде бақылай аласыз. Қонақ бетінде оқушылардың нәтижесін өзгерту, таймерді басқару немесе сабақ кезеңін ауыстыру мүмкіндігі жоқ.</p>
+<div class="grid"><section class="panel">
+<div class="status"><span class="dot"></span><span id="status">Байланыс тексерілуде…</span></div>
+<h2 id="title">Ашық сабақ</h2><p class="progress" id="progress">Кезең анықталуда</p><p class="description" id="desc">Мұғалімнің сабақ кезеңі мұнда көрінеді.</p>
+<div class="facts"><div class="fact"><b>🎯 Оқу мақсаты</b><span id="goal"></span></div><div class="fact"><b>🧭 Әдіс</b><span id="method"></span></div><div class="fact"><b>👥 Жұмыс түрі</b><span id="type"></span></div></div>
+</section><aside class="panel side">
+<h3>Сабақ туралы</h3>
+<div class="sidebox"><b>Мұғалім</b><span id="teacher"></span></div>
+<div class="sidebox"><b>Мектеп</b><span id="school"></span></div>
+<div class="sidebox"><b>Сабақ</b><span id="lesson"></span></div>
+<a class="btn" id="feedback" href="index.html?m=g">💬 Кері байланыс</a>
+<a class="btn other" href="materialdar.html">📚 Материалдар</a>
+<p class="note">Бұл жеке бақылау беті Firebase-тен тек сабақтың кезеңін оқиды. Мұғалімнің экраны тікелей көрсетілмейді. Сыртқы көрерменнің осы беттегі әрекеті сабақ басқаруын өзгертпейді.</p>
+</aside></div>
+</main><footer>Экосканер · Қонақтарға арналған бақылау режимі</footer>
+<script src="data.js"></script>
+<script>
+(()=>{
+const q=new URLSearchParams(location.search), t=q.get('t')||'', T=t.toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,24);
+const room=DATA.live.room+(T?'-t-'+T:'');
+const db=DATA.live.url.replace(/\/+$/,'');
+const $=id=>document.getElementById(id);
+$('teacher').textContent=DATA.lesson.teacher;$('school').textContent=DATA.lesson.school;
+$('lesson').textContent=DATA.lesson.date+' · '+DATA.lesson.room;
+$('goal').textContent=DATA.lesson.goal;
+if(T)$('feedback').href='index.html?m=g&t='+encodeURIComponent(T)+'#feedback';
+let last='';
+function show(id){
+const s=DATA.stages.find(s=>s.id===id)||DATA.stages[0],idx=DATA.stages.indexOf(s);
+$('title').textContent=s.title;
+$('progress').textContent=(idx+1)+' / '+DATA.stages.length+' · '+(DATA.parts[s.part]||s.kicker||'Сабақ');
+$('desc').textContent=s.kicker||'Сабақ жалғасуда';
+$('method').textContent=s.method||'Ұйымдастыру немесе қорытындылау кезеңі';
+$('type').textContent=s.type||'Барлық сынып';
+}
+async function poll(){
+if(!/^https:\/\/[\w.-]+\.(firebaseio\.com|firebasedatabase\.app)$/.test(db)){$('status').textContent='Firebase мекенжайы қосылмаған';return}
+try{const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),8000);
+let r=await fetch(db+'/'+encodeURIComponent(room)+'/state.json',{signal:ctl.signal,cache:'no-store'});clearTimeout(timer);
+if(!r.ok)throw Error('HTTP '+r.status);
+const state=await r.json();
+$('status').textContent=state?.stage?'Сабақ кезеңі автоматты жаңартылады':'Сабақтың басталуын күтеміз';
+if(state?.stage&&last!==state.stage){last=state.stage;show(state.stage)}
+if(!state?.stage)show('invite');
+}catch(e){$('status').textContent='Байланыс уақытша жоқ'}
+}
+show('invite');poll();setInterval(poll,5000);
+})();
+</script></body></html>
